@@ -14,7 +14,7 @@ public class Character : Actor {
     public int animationSpeed;
     public int direction;
     public bool defaultSpeeds;
-    protected const float DEFAULT_MOVEMENT_SPEED = 0.1f;
+    protected const float DEFAULT_MOVEMENT_SPEED = 0.5f;
     protected const int DEFAULT_ANIMATION_SPEED = 10;
 
     // Use this for initialization
