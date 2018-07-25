@@ -13,6 +13,7 @@ using UnityEngine;
 public class SpriteAnimation : MonoBehaviour {
 
     public enum spriteIndex {defaultSprite, upMovement, rightMovement, downMovement, leftMovement, attacking, casting, channelling, item, death, revive};
+    private spriteIndex prevIndex = spriteIndex.defaultSprite;
 
     public Sprite defaultSprite;
     public Sprite[] upMovementFrames;
@@ -33,51 +34,64 @@ public class SpriteAnimation : MonoBehaviour {
    
 
     void Start () {
-        animating = true;
+        animating = false;
         gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
 	}
 
     public void anim(spriteIndex sprites)
     {
-        switch (sprites)
+        if (!animating || (sprites != prevIndex))   //should not run if character is already animating or has not changed direction
         {
-            case spriteIndex.upMovement:
-                currentSprites = upMovementFrames;
-                break;
-            case spriteIndex.rightMovement:
-                currentSprites = rightMovementFrames;
-                break;
-            case spriteIndex.downMovement:
-                currentSprites = downMovementFrames;
-                break;
-            case spriteIndex.leftMovement:
-                currentSprites = leftMovementFrames;
-                break;
-            case spriteIndex.attacking:
-                currentSprites = attackAnimation;
-                break;
-            case spriteIndex.casting:
-                currentSprites = castingAnimation;
-                break;
-            case spriteIndex.channelling:
-                currentSprites = channellingAnimation;
-                break;
-            case spriteIndex.item:
-                currentSprites = itemGetAnimation;
-                break;
-            case spriteIndex.death:
-                currentSprites = deathAnimation;
-                break;
-            case spriteIndex.revive:
-                currentSprites = reviveAnimation;
-                break;
+            prevIndex = sprites;
+            animating = true;
+            switch (sprites)
+            {
+                case spriteIndex.upMovement:
+                    currentSprites = upMovementFrames;
+                    break;
+                case spriteIndex.rightMovement:
+                    currentSprites = rightMovementFrames;
+                    break;
+                case spriteIndex.downMovement:
+                    currentSprites = downMovementFrames;
+                    break;
+                case spriteIndex.leftMovement:
+                    currentSprites = leftMovementFrames;
+                    break;
+                case spriteIndex.attacking:
+                    currentSprites = attackAnimation;
+                    break;
+                case spriteIndex.casting:
+                    currentSprites = castingAnimation;
+                    break;
+                case spriteIndex.channelling:
+                    currentSprites = channellingAnimation;
+                    break;
+                case spriteIndex.item:
+                    currentSprites = itemGetAnimation;
+                    break;
+                case spriteIndex.death:
+                    currentSprites = deathAnimation;
+                    break;
+                case spriteIndex.revive:
+                    currentSprites = reviveAnimation;
+                    break;
+            }
+            if (animate != null) StopCoroutine(animate);
+            animate = _animate();
+            StartCoroutine(animate);
         }
-        animate = _animate(currentSprites);
-        StartCoroutine(animate);
     }
 
-    public void stopAnimation(int prevDir, int prevCardDir)
+    public void stopAnimation() //Stop non-movement animation
     {
+        if (animate != null) StopCoroutine(animate);
+        animating = false;
+        gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[0];
+    }
+    public void stopAnimation(int prevDir, int prevCardDir) //Stop animation for movement
+    {
+        if (animate != null) StopCoroutine(animate);
         animating = false;
         switch (prevDir)
         {
@@ -110,22 +124,24 @@ public class SpriteAnimation : MonoBehaviour {
                 else defaultSprite = upMovementFrames[0];
                 break;
         }
+        gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
     }
 
-    private IEnumerator _animate(Sprite[] sprites)
+    private IEnumerator _animate()
     {
-        int spritePos;
-        while (animating)
+        int spritePos = 0;
+        while (true)
         {
-            spritePos = 0;
-            while (spritePos < sprites.Length - 1)
+            spritePos++;
+            if (spritePos == currentSprites.Length)
             {
-                spritePos++;
-                gameObject.GetComponent<SpriteRenderer>().sprite = sprites[spritePos];
-                for (int i = 0; i < gameObject.GetComponent<Character>().animationSpeed; i++)
-                {
-                    yield return new WaitForEndOfFrame();
-                }
+                spritePos = 0;
+            }
+            gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
+            Debug.Log(gameObject.GetComponent<Player>().animationSpeed.ToString());
+            for (int i = 0; i <= gameObject.GetComponent<Player>().animationSpeed; i++)
+            {
+                yield return new WaitForEndOfFrame();
             }
         }
     }
