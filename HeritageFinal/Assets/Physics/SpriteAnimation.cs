@@ -29,13 +29,15 @@ public class SpriteAnimation : MonoBehaviour {
     private Sprite[] currentSprites;
 
     private IEnumerator animate;
+    private bool animating;
    
 
     void Start () {
+        animating = true;
         gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
 	}
 
-    public void animateMovement(spriteIndex sprites)
+    public void anim(spriteIndex sprites)
     {
         switch (sprites)
         {
@@ -74,17 +76,53 @@ public class SpriteAnimation : MonoBehaviour {
         StartCoroutine(animate);
     }
 
+    public void stopAnimation(int prevDir, int prevCardDir)
+    {
+        animating = false;
+        switch (prevDir)
+        {
+            case Direction.UP:
+                defaultSprite = upMovementFrames[0];
+                break;
+            case Direction.UP_RIGHT:
+                if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
+                else defaultSprite = upMovementFrames[0];
+                break;
+            case Direction.RIGHT:
+                defaultSprite = rightMovementFrames[0];
+                break;
+            case Direction.DOWN_RIGHT:
+                if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
+                else defaultSprite = downMovementFrames[0];
+                break;
+            case Direction.DOWN:
+                defaultSprite = downMovementFrames[0];
+                break;
+            case Direction.DOWN_LEFT:
+                if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
+                else defaultSprite = downMovementFrames[0];
+                break;
+            case Direction.LEFT:
+                defaultSprite = leftMovementFrames[0];
+                break;
+            case Direction.UP_LEFT:
+                if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
+                else defaultSprite = upMovementFrames[0];
+                break;
+        }
+    }
+
     private IEnumerator _animate(Sprite[] sprites)
     {
         int spritePos;
-        while (true)
+        while (animating)
         {
             spritePos = 0;
-            while (spritePos < sprites.Length)
+            while (spritePos < sprites.Length - 1)
             {
                 spritePos++;
                 gameObject.GetComponent<SpriteRenderer>().sprite = sprites[spritePos];
-                for (int j = 0; j < gameObject.GetComponent<Character>().animationSpeed; j++)
+                for (int i = 0; i < gameObject.GetComponent<Character>().animationSpeed; i++)
                 {
                     yield return new WaitForEndOfFrame();
                 }
