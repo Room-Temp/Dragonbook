@@ -43,7 +43,7 @@ public class Player : Character {
             else if (!up && !down && left && !right) direction = Direction.LEFT;
             else if (up && !down && left && !right) direction = Direction.UP_LEFT;
             else direction = Direction.IDLE;
-            gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed, gameObject);
+            gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
         }
 	}
 }

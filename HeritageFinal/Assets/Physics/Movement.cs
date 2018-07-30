@@ -13,35 +13,55 @@ public class Movement : MonoBehaviour {
     public int direction;
     private int prevDir;
     private int prevCardDir;
+    private int tempCardDir;
+    private bool playerMoving;
     public enum CharacterType { Static, Dynamic, Player, Follower };
     public CharacterType characterType;
 
 
     void Start () {
-        
+        playerMoving = false;
     }
 
-    public void move(int dir, float moveSpeed, int animSpeed, GameObject obj)
+    public void move(int dir, float moveSpeed, int animSpeed)
     {
         switch (characterType)
         {
             case CharacterType.Static:
-                staticMovement(dir, moveSpeed, obj);
+                staticMovement(dir, moveSpeed);
                 break;
             case CharacterType.Dynamic:
-                staticMovement(dir, moveSpeed, obj);
-                dynamicMovement(dir, animSpeed, obj);
+                staticMovement(dir, moveSpeed);
+                dynamicMovement(dir, animSpeed);
                 break;
             case CharacterType.Player:
+                if (dir == Direction.IDLE && playerMoving)  //player has released movement key
+                {
+                    staticMovement(dir, moveSpeed);
+                    dynamicMovement(dir, animSpeed);
+                }
+                else if (dir != Direction.IDLE && !playerMoving) //player is moving
+                {
+                    staticMovement(dir, moveSpeed);
+                    dynamicMovement(dir, animSpeed);
+                    playerMoving = true;
+                }
+                else if (dir != Direction.IDLE && dir != prevDir) //player has changed direction while moving
+                {
+                    staticMovement(dir, moveSpeed);
+                    dynamicMovement(dir, animSpeed);
+                    playerMoving = true;
+                }
                 break;
             case CharacterType.Follower:
                 break;
         }
     }
 
-    private void staticMovement(int dir, float moveSpeed, GameObject obj)
+    private void staticMovement(int dir, float moveSpeed)
     {
         Vector2 vel = Vector2.zero;
+        tempCardDir = prevCardDir;
         switch (dir)
         {
             case Direction.UP:
@@ -77,43 +97,63 @@ public class Movement : MonoBehaviour {
         {
             prevDir = dir;
         }
-        obj.GetComponent<Rigidbody2D>().velocity = vel;
+        gameObject.GetComponent<Rigidbody2D>().velocity = vel;
     }
-    private void dynamicMovement(int dir, int animSpeed, GameObject obj)
+    private void dynamicMovement(int dir, int animSpeed)
     {
-        switch (dir)
+        if (prevCardDir == 0 || tempCardDir != prevCardDir)
         {
-            case Direction.UP:
-                gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
-                break;
-            case Direction.UP_RIGHT:
-                if (prevCardDir == Direction.RIGHT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
-                else gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
-                break;
-            case Direction.RIGHT:
-                gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
-                break;
-            case Direction.DOWN_RIGHT:
-                if (prevCardDir == Direction.RIGHT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
-                else gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
-                break;
-            case Direction.DOWN:
-                gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
-                break;
-            case Direction.DOWN_LEFT:
-                if (prevCardDir == Direction.LEFT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
-                else gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
-                break;
-            case Direction.LEFT:
-                gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
-                break;
-            case Direction.UP_LEFT:
-                if (prevCardDir == Direction.LEFT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
-                else gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
-                break;
-            default:
-                gameObject.GetComponent<SpriteAnimation>().stopAnimation(prevDir, prevCardDir);
-                break;
+            switch (dir)
+            {
+                case Direction.UP:
+                    gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
+                    break;
+                case Direction.UP_RIGHT:
+                    if (prevCardDir == Direction.RIGHT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
+                    else
+                    {
+                        prevCardDir = Direction.UP;
+                        gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
+                    }
+                    break;
+                case Direction.RIGHT:
+                    gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
+                    break;
+                case Direction.DOWN_RIGHT:
+                    if (prevCardDir == Direction.RIGHT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.rightMovement);
+                    else
+                    {
+                        prevCardDir = Direction.DOWN;
+                        gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
+                    }
+                    break;
+                case Direction.DOWN:
+                    gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
+                    break;
+                case Direction.DOWN_LEFT:
+                    if (prevCardDir == Direction.LEFT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
+                    else
+                    {
+                        prevCardDir = Direction.DOWN;
+                        gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.downMovement);
+                    }
+                    break;
+                case Direction.LEFT:
+                    gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
+                    break;
+                case Direction.UP_LEFT:
+                    if (prevCardDir == Direction.LEFT) gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.leftMovement);
+                    else
+                    {
+                        prevCardDir = Direction.UP;
+                        gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
+                    }
+                    break;
+                default:
+                    gameObject.GetComponent<SpriteAnimation>().stopAnimation(prevDir, prevCardDir);
+                    playerMoving = false;
+                    break;
+            }
         }
     }
 	// Update is called once per frame
