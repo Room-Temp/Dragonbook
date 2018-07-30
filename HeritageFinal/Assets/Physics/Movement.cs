@@ -35,21 +35,21 @@ public class Movement : MonoBehaviour {
                 dynamicMovement(dir, animSpeed);
                 break;
             case CharacterType.Player:
-                if (dir == Direction.IDLE && playerMoving)  //player has released movement key
+                if (dir == Direction.IDLE)  //player has released movement key
                 {
                     staticMovement(dir, moveSpeed);
                     dynamicMovement(dir, animSpeed);
                 }
-                else if (dir != Direction.IDLE && !playerMoving) //player is moving
+                else if (dir != Direction.IDLE && !playerMoving) //player begins movement
                 {
                     staticMovement(dir, moveSpeed);
                     dynamicMovement(dir, animSpeed);
                     playerMoving = true;
                 }
-                else if (dir != Direction.IDLE && dir != prevDir) //player has changed direction while moving
+                else if (dir != Direction.IDLE && dir != prevDir) //player changes direction in movement
                 {
                     staticMovement(dir, moveSpeed);
-                    dynamicMovement(dir, animSpeed);
+                    if (prevCardDir != tempCardDir || prevCardDir == 0) dynamicMovement(dir, animSpeed);
                     playerMoving = true;
                 }
                 break;
@@ -101,8 +101,6 @@ public class Movement : MonoBehaviour {
     }
     private void dynamicMovement(int dir, int animSpeed)
     {
-        if (prevCardDir == 0 || tempCardDir != prevCardDir)
-        {
             switch (dir)
             {
                 case Direction.UP:
@@ -153,11 +151,6 @@ public class Movement : MonoBehaviour {
                     gameObject.GetComponent<SpriteAnimation>().stopAnimation(prevDir, prevCardDir);
                     playerMoving = false;
                     break;
-            }
-        }
+            }      
     }
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

@@ -13,7 +13,6 @@ using UnityEngine;
 public class SpriteAnimation : MonoBehaviour {
 
     public enum spriteIndex {defaultSprite, upMovement, rightMovement, downMovement, leftMovement, attacking, casting, channelling, item, death, revive};
-    private spriteIndex prevIndex = spriteIndex.defaultSprite;
 
     public Sprite defaultSprite;
     public Sprite[] upMovementFrames;
@@ -30,9 +29,11 @@ public class SpriteAnimation : MonoBehaviour {
     public Sprite[] currentSprites;
 
     private IEnumerator animate;
+    private bool coroutineRunning;
    
 
     void Start () {
+        coroutineRunning = false;
         gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
 	}
 
@@ -76,6 +77,8 @@ public class SpriteAnimation : MonoBehaviour {
 
     public void startAnimation() //Function for forcibly starting animation
     {
+        if (coroutineRunning) StopCoroutine(animate);
+        coroutineRunning = true;
         animate = _animate();
         StartCoroutine(animate);
     }
@@ -88,51 +91,51 @@ public class SpriteAnimation : MonoBehaviour {
 
     public void stopAnimation() //Stop non-movement animation
     {
-        StopCoroutine(animate);
-        gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[0];
+        coroutineRunning = false;
+            gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[0];
     }
 
     public void stopAnimation(int prevDir, int prevCardDir) //Stop animation for movement
     {
-        StopCoroutine(animate);
-        switch (prevDir)
-        {
-            case Direction.UP:
-                defaultSprite = upMovementFrames[0];
-                break;
-            case Direction.UP_RIGHT:
-                if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
-                else defaultSprite = upMovementFrames[0];
-                break;
-            case Direction.RIGHT:
-                defaultSprite = rightMovementFrames[0];
-                break;
-            case Direction.DOWN_RIGHT:
-                if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
-                else defaultSprite = downMovementFrames[0];
-                break;
-            case Direction.DOWN:
-                defaultSprite = downMovementFrames[0];
-                break;
-            case Direction.DOWN_LEFT:
-                if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
-                else defaultSprite = downMovementFrames[0];
-                break;
-            case Direction.LEFT:
-                defaultSprite = leftMovementFrames[0];
-                break;
-            case Direction.UP_LEFT:
-                if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
-                else defaultSprite = upMovementFrames[0];
-                break;
-        }
-        gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
+        coroutineRunning = false;
+            switch (prevDir)
+            {
+                case Direction.UP:
+                    defaultSprite = upMovementFrames[0];
+                    break;
+                case Direction.UP_RIGHT:
+                    if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
+                    else defaultSprite = upMovementFrames[0];
+                    break;
+                case Direction.RIGHT:
+                    defaultSprite = rightMovementFrames[0];
+                    break;
+                case Direction.DOWN_RIGHT:
+                    if (prevCardDir == Direction.RIGHT) defaultSprite = rightMovementFrames[0];
+                    else defaultSprite = downMovementFrames[0];
+                    break;
+                case Direction.DOWN:
+                    defaultSprite = downMovementFrames[0];
+                    break;
+                case Direction.DOWN_LEFT:
+                    if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
+                    else defaultSprite = downMovementFrames[0];
+                    break;
+                case Direction.LEFT:
+                    defaultSprite = leftMovementFrames[0];
+                    break;
+                case Direction.UP_LEFT:
+                    if (prevCardDir == Direction.LEFT) defaultSprite = leftMovementFrames[0];
+                    else defaultSprite = upMovementFrames[0];
+                    break;
+            }
+            gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;       
     }
 
     private IEnumerator _animate()
     {
         int spritePos = 0;
-        while (true)
+        while (coroutineRunning)
         {
             spritePos++;
             if (spritePos == currentSprites.Length)
@@ -142,6 +145,7 @@ public class SpriteAnimation : MonoBehaviour {
             gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
             for (int i = 0; i <= gameObject.GetComponent<Player>().animationSpeed; i++)
             {
+                if (!coroutineRunning) break;
                 yield return new WaitForEndOfFrame();
             }
         }
