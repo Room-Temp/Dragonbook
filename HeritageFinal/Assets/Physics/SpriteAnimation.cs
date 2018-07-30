@@ -27,72 +27,74 @@ public class SpriteAnimation : MonoBehaviour {
     public Sprite[] deathAnimation;
     public Sprite[] reviveAnimation;
     
-    private Sprite[] currentSprites;
+    public Sprite[] currentSprites;
 
     private IEnumerator animate;
-    private bool animating;
    
 
     void Start () {
-        animating = false;
         gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
 	}
 
     public void anim(spriteIndex sprites)
     {
-        if (!animating || (sprites != prevIndex))   //should not run if character is already animating or has not changed direction
+        switch (sprites)
         {
-            prevIndex = sprites;
-            animating = true;
-            switch (sprites)
-            {
-                case spriteIndex.upMovement:
-                    currentSprites = upMovementFrames;
-                    break;
-                case spriteIndex.rightMovement:
-                    currentSprites = rightMovementFrames;
-                    break;
-                case spriteIndex.downMovement:
-                    currentSprites = downMovementFrames;
-                    break;
-                case spriteIndex.leftMovement:
-                    currentSprites = leftMovementFrames;
-                    break;
-                case spriteIndex.attacking:
-                    currentSprites = attackAnimation;
-                    break;
-                case spriteIndex.casting:
-                    currentSprites = castingAnimation;
-                    break;
-                case spriteIndex.channelling:
-                    currentSprites = channellingAnimation;
-                    break;
-                case spriteIndex.item:
-                    currentSprites = itemGetAnimation;
-                    break;
-                case spriteIndex.death:
-                    currentSprites = deathAnimation;
-                    break;
-                case spriteIndex.revive:
-                    currentSprites = reviveAnimation;
-                    break;
-            }
-            if (animate != null) StopCoroutine(animate);
-            animate = _animate();
-            StartCoroutine(animate);
+            case spriteIndex.upMovement:
+                currentSprites = upMovementFrames;
+                break;
+            case spriteIndex.rightMovement:
+                currentSprites = rightMovementFrames;
+                break;
+            case spriteIndex.downMovement:
+                currentSprites = downMovementFrames;
+                break;
+            case spriteIndex.leftMovement:
+                currentSprites = leftMovementFrames;
+                break;
+            case spriteIndex.attacking:
+                currentSprites = attackAnimation;
+                break;
+            case spriteIndex.casting:
+                currentSprites = castingAnimation;
+                break;
+            case spriteIndex.channelling:
+                currentSprites = channellingAnimation;
+                break;
+            case spriteIndex.item:
+                currentSprites = itemGetAnimation;
+                break;
+            case spriteIndex.death:
+                currentSprites = deathAnimation;
+                break;
+            case spriteIndex.revive:
+                currentSprites = reviveAnimation;
+                break;
         }
+        startAnimation();
+    }
+
+    public void startAnimation() //Function for forcibly starting animation
+    {
+        animate = _animate();
+        StartCoroutine(animate);
+    }
+
+    public void startAnimation(Sprite[] sprites) //Cutscene animations can be passed through this overload function
+    {
+        currentSprites = sprites;
+        startAnimation();
     }
 
     public void stopAnimation() //Stop non-movement animation
     {
-        if (animate != null) StopCoroutine(animate);
-        animating = false;
+        StopCoroutine(animate);
         gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[0];
     }
+
     public void stopAnimation(int prevDir, int prevCardDir) //Stop animation for movement
     {
-        if (animate != null) StopCoroutine(animate);
-        animating = false;
+        StopCoroutine(animate);
         switch (prevDir)
         {
             case Direction.UP:
@@ -138,7 +140,6 @@ public class SpriteAnimation : MonoBehaviour {
                 spritePos = 0;
             }
             gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
-            Debug.Log(gameObject.GetComponent<Player>().animationSpeed.ToString());
             for (int i = 0; i <= gameObject.GetComponent<Player>().animationSpeed; i++)
             {
                 yield return new WaitForEndOfFrame();
