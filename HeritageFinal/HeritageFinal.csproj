@@ -310,6 +310,7 @@
     <Compile Include="Assets\Physics\Direction.cs" />
     <Compile Include="Assets\Physics\Movement.cs" />
     <Compile Include="Assets\Physics\SpriteAnimation.cs" />
+    <Compile Include="Assets\Text + UI\Dialog.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Packages\Old School Modern\readme_OldSchoolModern.txt" />
