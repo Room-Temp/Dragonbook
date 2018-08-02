@@ -17,8 +17,11 @@ public class Player : Character {
 
     public bool controllable;
 
+    public int linePlacement;   // 1 is the controllable character
+
 	// Use this for initialization
 	void Start () {
+        Dialogue.dialogueRunning = false;
         if (defaultSpeeds)
         {
             movementSpeed = DEFAULT_MOVEMENT_SPEED;
@@ -26,6 +29,15 @@ public class Player : Character {
         }
     }
 	
+    public void stopPlayerControl()
+    {
+            if (linePlacement == 1)
+            {
+                controllable = !controllable;
+            direction = Direction.IDLE;
+            }
+    }
+
 	// Update is called once per frame
 	void Update () {
         up = Input.GetKey(Controls.up);
@@ -34,6 +46,7 @@ public class Player : Character {
         right = Input.GetKey(Controls.right);
 		if (controllable)
         {
+            
             if (up && !down && !left && !right) direction = Direction.UP;
             else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
             else if (!up && !down && !left && right) direction = Direction.RIGHT;
@@ -45,5 +58,6 @@ public class Player : Character {
             else direction = Direction.IDLE;
             gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
         }
+        
 	}
 }

@@ -12,13 +12,18 @@ using UnityEngine;
 */
 public class Dialogue : MonoBehaviour {
 
+    public static bool dialogueRunning;
+
+    const float MAX_DISTANCE = 2f;     // For dialogue initiated by the player 
     const int SCROLL_SPEED = 3; // How many frames pass before text scroll
     const int SCROLL_AMT = 1;   // How many characters per text scroll
     const int CHARACTERS_PER_LINE = 40; // How many characters can fit on a single line of text
     const int LINES_PER_BOX = 4; // How many lines in each text box
     const float TEXT_ADVANCE_BREATHE_RATE = 0.1f;
+    
 
     public string dialogue; // The dialogue typed in the editor's component
+    public bool playerInitiatesDialogue;    // If true, the script listens for the player's button press
     private string currDialogue;    // String currently shown in the text box
     private int scrollSpeed; // Const scroll speed plus/minus modifiers
     private IEnumerator _scrollText;
@@ -69,19 +74,28 @@ public class Dialogue : MonoBehaviour {
         return index;   //this should always return the index at ']'. Then the index iterates into the next character.
     }
 
+    private bool checkTextCount()
+    {
+        string tempCount = "";
+        for (int i = 0; i < textCount.Length; i++)
+        {
+            if (textCount[i] != '\n') tempCount += textCount[i];
+        }
+        return (dialogue != tempCount);
+    }
+
     private IEnumerator scrollText()
     {
+        dialogueRunning = true;
         Interface.dialogueTextBoxImage.enabled = true;
-        Interface.dialogueAdvanceSprite.enabled = false;
-        
-        while (textCount != dialogue)
+        Interface.dialogueTextBox.enabled = true;
+        Interface.dialogueAdvanceSprite.enabled = false;       
+        while (checkTextCount())
         {
-//            for (int i = 0; i < dialogue.Length; i++)   // Each text box
-//            {
-                currDialogue = "";
-                for (int j = 0; j < LINES_PER_BOX || textCount.Length == 0; j++) // Each line per text box
+                //currDialogue = "";
+                for (int j = 0; j < LINES_PER_BOX || textCount.Length == 0 && checkTextCount(); j++) // Each line per text box
                 {
-                    for (int k = 0; (currDialogue.Length % CHARACTERS_PER_LINE > 0 || currDialogue.Length == 0) && k < dialogue.Length; k++)
+                    for (int k = 0; (currDialogue.Length % CHARACTERS_PER_LINE > 0 || currDialogue.Length == 0) && checkTextCount(); k++)
                     {
                         if (dialogue[k] == '[')
                         {
@@ -142,10 +156,12 @@ public class Dialogue : MonoBehaviour {
                 }
             advanceMarker = true;
                 Interface.dialogueAdvanceSprite.enabled = false;
-//            }
         }
         Interface.dialogueTextBoxImage.enabled = false;
+        Interface.dialogueTextBox.enabled = false;
         yield return new WaitForEndOfFrame();
+        textCount = "";
+        dialogueRunning = false;
     }
 
 	// Use this for initialization
@@ -160,9 +176,8 @@ public class Dialogue : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKey(Controls.buttonA) && textCount == "")
+        if (Input.GetKey(Controls.buttonA) && !dialogueRunning && playerInitiatesDialogue)
         {
-            if (_scrollText != null) StopCoroutine(_scrollText);
             _scrollText = scrollText();
             StartCoroutine(_scrollText);
         }
