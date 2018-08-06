@@ -44,7 +44,7 @@ public class Player : Character {
         down = Input.GetKey(Controls.down);
         left = Input.GetKey(Controls.left);
         right = Input.GetKey(Controls.right);
-		if (controllable)
+		if (controllable && GameState.getState(GameState.gameState.overworld))
         {
             
             if (up && !down && !left && !right) direction = Direction.UP;

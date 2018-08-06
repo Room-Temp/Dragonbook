@@ -7,50 +7,58 @@ using UnityEngine;
 /*
     Name = Dialogue
     Type = Action Script
-    Purpose = Facilitate dialog from NPCs and cutscenes. Includes text parser.
-
+    Purpose = Facilitate dialog from NPCs and cutscenes.
 */
-public class Dialogue : MonoBehaviour {
+public class Dialogue : MonoBehaviour
+{
+    // Globals:
+    public static bool dialogueRunning; // So two coroutines don't run at the same time
+    public static bool dialogueLoaded;
 
-    public static bool dialogueRunning;
-
+    // Constants:
     const float MAX_DISTANCE = 2f;     // For dialogue initiated by the player 
-    const int SCROLL_SPEED = 3; // How many frames pass before text scroll
+    const int SCROLL_SPEED = 2; // How many frames pass before text scroll
     const int SCROLL_AMT = 1;   // How many characters per text scroll
     const int CHARACTERS_PER_LINE = 40; // How many characters can fit on a single line of text
     const int LINES_PER_BOX = 4; // How many lines in each text box
     const float TEXT_ADVANCE_BREATHE_RATE = 0.1f;
-    
 
+    // Variables:
     public string dialogue; // The dialogue typed in the editor's component
     public bool playerInitiatesDialogue;    // If true, the script listens for the player's button press
+
     private string currDialogue;    // String currently shown in the text box
     private int scrollSpeed; // Const scroll speed plus/minus modifiers
     private IEnumerator _scrollText;
     private bool wait;
     private bool lockSpeed;
     private bool instantScroll;
+    private bool newText;
     private bool advanceMarker;
     private string textCount;
+    private int dialogueIndex;
 
-
+    // Functions:
     private int parseText(int index)
     {
         // [W10][W] - wait ten frames
         // [L] - lock scrolling speed
         // [I] - instant scroll
+        // [N] - new text box
         textCount += dialogue[index];
         index++;
+        textCount += dialogue[index];
         switch (dialogue[index])
         {
             case 'W':
                 string num = "";
                 if (!wait)
                 {
+                    index++;
                     while (dialogue[index] != ']')
                     {
                         textCount += dialogue[index];
-                        num+= dialogue[index];
+                        num += dialogue[index];
                         index++;
                     }
                     scrollSpeed = int.Parse(num);
@@ -60,7 +68,7 @@ public class Dialogue : MonoBehaviour {
                     scrollSpeed = SCROLL_SPEED;
                     index++;
                 }
-                wait = !wait;   
+                wait = !wait;
                 break;
             case 'L':
                 lockSpeed = !lockSpeed;
@@ -70,10 +78,30 @@ public class Dialogue : MonoBehaviour {
                 instantScroll = !instantScroll;
                 index++;
                 break;
+            case 'N':
+                newText = true;
+                index++;
+                break;
         }
-        return index;   //this should always return the index at ']'. Then the index iterates into the next character.
+        textCount += dialogue[index];
+        return index;   //this should always return the index after ']'.
     }
-
+    private int readWord(int index) // Returns the length of the word beginning at index + 1
+    {
+        int count = 0;
+        try
+        {
+            for (int i = index + 1; dialogue[i] != ' ' && dialogue[i] != '['; i++)
+            {
+                count++;
+            }
+        }
+        catch
+        {
+            count = 0;
+        }
+        return count;
+    }
     private bool checkTextCount()
     {
         string tempCount = "";
@@ -83,103 +111,152 @@ public class Dialogue : MonoBehaviour {
         }
         return (dialogue != tempCount);
     }
-
+    private int getTextCount(int textBoxNo)
+    {
+        int length = 0;
+        for (int i = 0; i < currDialogue.Length; i++)
+        {
+            if (currDialogue[i] != '\n') length++;
+        }
+        return length;
+    }
     private IEnumerator scrollText()
     {
         dialogueRunning = true;
         Interface.dialogueTextBoxImage.enabled = true;
         Interface.dialogueTextBox.enabled = true;
-        Interface.dialogueAdvanceSprite.enabled = false;       
-        while (checkTextCount())
+        Interface.dialogueNameBox.enabled = true;
+        Interface.dialogueAdvanceSprite.enabled = false;
+        for (int i = 0; textCount != dialogue; i++)
         {
-                //currDialogue = "";
-                for (int j = 0; j < LINES_PER_BOX || textCount.Length == 0 && checkTextCount(); j++) // Each line per text box
+            currDialogue = "";
+            newText = false;
+            for (int j = -1; j < LINES_PER_BOX && textCount != dialogue && !newText; j++) // Each line per text box
+            {               
+                while ((getTextCount(i + 1) < CHARACTERS_PER_LINE * (j + 1) || j == -1) && textCount != dialogue && !newText)
                 {
-                    for (int k = 0; (currDialogue.Length % CHARACTERS_PER_LINE > 0 || currDialogue.Length == 0) && checkTextCount(); k++)
+                    
+                    if (j == -1) j = 0;
+                    if (dialogue[dialogueIndex] == '[') // Beginning of command
                     {
-                        if (dialogue[k] == '[')
+                        dialogueIndex = parseText(dialogueIndex);
+                        if (newText)
                         {
-                            k = parseText(k);
+                            dialogueIndex++;
+                            goto newBox;
                         }
-                        else
-                        {
-                            currDialogue += dialogue[k];
-                        }
-                        textCount += dialogue[k];
-                        Interface.dialogueTextBox.text = currDialogue;
-                        for (int l = 0; l < scrollSpeed && !instantScroll; l++)
-                        {
-                            yield return new WaitForEndOfFrame();
-                        }
+                        goto skipCommand;
                     }
-                    currDialogue += '\n';
-                    textCount += '\n';
-                }
-                Interface.dialogueAdvanceSprite.enabled = true;
-                bool fadingIn = true;
-                Interface.dialogueAdvanceSprite.color = new
-                    Color(Interface.dialogueAdvanceSprite.color.r,
-                          Interface.dialogueAdvanceSprite.color.g,
-                          Interface.dialogueAdvanceSprite.color.b, 0);
-                while (advanceMarker)
-                {
-                    if (Interface.dialogueAdvanceSprite.color.a <= 0)
+                    else if (dialogue[dialogueIndex] == ' ')
                     {
-                        fadingIn = true;
-                    }
-                    else if (Interface.dialogueAdvanceSprite.color.a >= 1)
-                    {
-                        fadingIn = false;
-                    }
+                        
+                        textCount += ' ';
+                        if (getTextCount(i + 1) % CHARACTERS_PER_LINE == 0) {  } //First character, print nothing
+                        else if (getTextCount(i + 1) + readWord(dialogueIndex) >= CHARACTERS_PER_LINE * (j + 1)) //following word is greater than allowed characters
+                        {
+                            while (getTextCount(i + 1) % CHARACTERS_PER_LINE < CHARACTERS_PER_LINE - 1) //fill remainder of the line with spaces
+                            {
+                                currDialogue += ' ';
+                            }
+                            // last character, print space then go to next line
+                            currDialogue += ' ';
+                        }
+                        else // Any other space is printed normally
+                        {
+                            currDialogue += ' ';
+                        }
 
-                    if (fadingIn)
-                    {
-                        Interface.dialogueAdvanceSprite.color = new
-                            Color(Interface.dialogueAdvanceSprite.color.r,
-                                  Interface.dialogueAdvanceSprite.color.g,
-                                  Interface.dialogueAdvanceSprite.color.b, 
-                                  Interface.dialogueAdvanceSprite.color.a + TEXT_ADVANCE_BREATHE_RATE);
+
                     }
                     else
                     {
-                        Interface.dialogueAdvanceSprite.color = new
-                            Color(Interface.dialogueAdvanceSprite.color.r,
-                            Interface.dialogueAdvanceSprite.color.g,
-                            Interface.dialogueAdvanceSprite.color.b,
-                            Interface.dialogueAdvanceSprite.color.a - TEXT_ADVANCE_BREATHE_RATE);
+                        currDialogue += dialogue[dialogueIndex];
+                        textCount += dialogue[dialogueIndex];
                     }
-                    if (Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB))
+                    Interface.dialogueTextBox.text = currDialogue;
+                    for (int l = 0; l < scrollSpeed && !instantScroll; l++)
                     {
-                        advanceMarker = false;
+                        yield return new WaitForEndOfFrame();
                     }
-                    yield return new WaitForEndOfFrame();
+                    skipCommand:
+                    dialogueIndex++;
                 }
+                currDialogue += '\n';
+            }
+            newBox:
+            Interface.dialogueAdvanceSprite.enabled = true;
+            bool fadingIn = true;
+            Interface.dialogueAdvanceSprite.color = new
+                Color(Interface.dialogueAdvanceSprite.color.r,
+                      Interface.dialogueAdvanceSprite.color.g,
+                      Interface.dialogueAdvanceSprite.color.b, 0);
+            while (advanceMarker)
+            {
+                if (Interface.dialogueAdvanceSprite.color.a <= 0)
+                {
+                    fadingIn = true;
+                }
+                else if (Interface.dialogueAdvanceSprite.color.a >= 1)
+                {
+                    fadingIn = false;
+                }
+
+                if (fadingIn)
+                {
+                    Interface.dialogueAdvanceSprite.color = new
+                        Color(Interface.dialogueAdvanceSprite.color.r,
+                              Interface.dialogueAdvanceSprite.color.g,
+                              Interface.dialogueAdvanceSprite.color.b,
+                              Interface.dialogueAdvanceSprite.color.a + TEXT_ADVANCE_BREATHE_RATE);
+                }
+                else
+                {
+                    Interface.dialogueAdvanceSprite.color = new
+                        Color(Interface.dialogueAdvanceSprite.color.r,
+                        Interface.dialogueAdvanceSprite.color.g,
+                        Interface.dialogueAdvanceSprite.color.b,
+                        Interface.dialogueAdvanceSprite.color.a - TEXT_ADVANCE_BREATHE_RATE);
+                }
+                if (Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB))
+                {
+                    advanceMarker = false;
+                }
+                yield return new WaitForEndOfFrame();
+            }
             advanceMarker = true;
-                Interface.dialogueAdvanceSprite.enabled = false;
+            Interface.dialogueAdvanceSprite.enabled = false;
         }
         Interface.dialogueTextBoxImage.enabled = false;
         Interface.dialogueTextBox.enabled = false;
-        yield return new WaitForEndOfFrame();
+        Interface.dialogueNameBox.enabled = false;
         textCount = "";
         dialogueRunning = false;
+        dialogueIndex = 0;
+        yield return new WaitForEndOfFrame();
     }
-
-	// Use this for initialization
-	void Start () {
+    void Start()
+    {
         wait = false;
         lockSpeed = false;
         instantScroll = false;
         advanceMarker = true;
+        currDialogue = "";
         textCount = "";
         scrollSpeed = SCROLL_SPEED;
+        dialogueIndex = 0;
     }
-	
-	// Update is called once per frame
-	void Update () {
-        if (Input.GetKey(Controls.buttonA) && !dialogueRunning && playerInitiatesDialogue)
+    void Update()
+    {
+        if (playerInitiatesDialogue && !dialogueRunning)
+        {
+
+        }
+
+        if (Input.GetKeyDown(Controls.buttonA) && !dialogueRunning && playerInitiatesDialogue)
         {
             _scrollText = scrollText();
             StartCoroutine(_scrollText);
         }
+       
     }
 }

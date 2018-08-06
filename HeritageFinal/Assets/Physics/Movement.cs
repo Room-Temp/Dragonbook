@@ -57,7 +57,6 @@ public class Movement : MonoBehaviour {
                 break;
         }
     }
-
     private void staticMovement(int dir, float moveSpeed)
     {
         Vector2 vel = Vector2.zero;

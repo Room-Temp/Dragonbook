@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+    Name - Controls
+    Type - Global Script
+    Purpose - hold information for key controls. Can be bound to other keys/controller
+*/
 public class Controls : MonoBehaviour {
 
     public static KeyCode up;
