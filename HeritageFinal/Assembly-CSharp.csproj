@@ -61,6 +61,7 @@
      <Compile Include="Assets\Physics\Movement.cs" />
      <Compile Include="Assets\Physics\SpriteAnimation.cs" />
      <Compile Include="Assets\Text + UI\Dialogue.cs" />
+     <Compile Include="Assets\Text + UI\GameState.cs" />
      <Compile Include="Assets\Text + UI\Interface.cs" />
      <None Include="Assets\Packages\Old School Modern\readme_OldSchoolModern.txt" />
  <Reference Include="UnityEditor.StandardEvents">
