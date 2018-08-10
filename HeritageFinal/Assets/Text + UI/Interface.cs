@@ -27,6 +27,7 @@ public class Interface : MonoBehaviour {
         dialogueTextBox = _dialogueTextBox;
         dialogueNameBox = _dialogueNameBox;
         dialogueAdvanceSprite = _dialogueAdvanceSprite;
+        Interaction.interacting = false;
 	}
 	
 	// Update is called once per frame

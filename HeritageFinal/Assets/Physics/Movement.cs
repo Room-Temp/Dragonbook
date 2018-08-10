@@ -11,7 +11,7 @@ using UnityEngine;
 public class Movement : MonoBehaviour {
 
     public int direction;
-    private int prevDir;
+    public int prevDir;
     private int prevCardDir;
     private int tempCardDir;
     private bool playerMoving;

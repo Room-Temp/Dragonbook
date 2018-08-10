@@ -9,7 +9,7 @@ using UnityEngine;
     Type = Action Script
     Purpose = Facilitate dialog from NPCs and cutscenes.
 */
-public class Dialogue : MonoBehaviour
+public class Dialogue : Interaction
 {
     // Globals:
     public static bool dialogueRunning; // So two coroutines don't run at the same time

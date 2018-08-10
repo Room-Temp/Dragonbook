@@ -19,9 +19,13 @@ public class Player : Character {
 
     public int linePlacement;   // 1 is the controllable character
 
+    public Object[] interactiveNPCs;
+    private int interactiveIndex;
+
 	// Use this for initialization
 	void Start () {
         Dialogue.dialogueRunning = false;
+        interactiveIndex = 0;
         if (defaultSpeeds)
         {
             movementSpeed = DEFAULT_MOVEMENT_SPEED;
@@ -44,9 +48,9 @@ public class Player : Character {
         down = Input.GetKey(Controls.down);
         left = Input.GetKey(Controls.left);
         right = Input.GetKey(Controls.right);
-		if (controllable && GameState.getState(GameState.gameState.overworld))
-        {
-            
+		if (controllable && !Interaction.interacting && GameState.getState(GameState.gameState.overworld))
+        {    
+            // Movement        
             if (up && !down && !left && !right) direction = Direction.UP;
             else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
             else if (!up && !down && !left && right) direction = Direction.RIGHT;
@@ -57,6 +61,7 @@ public class Player : Character {
             else if (up && !down && left && !right) direction = Direction.UP_LEFT;
             else direction = Direction.IDLE;
             gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+
         }
         
 	}

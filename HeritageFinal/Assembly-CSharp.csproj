@@ -55,6 +55,7 @@
   <ItemGroup>
      <Compile Include="Assets\Actors\Actor.cs" />
      <Compile Include="Assets\Actors\Character.cs" />
+     <Compile Include="Assets\Actors\NPC.cs" />
      <Compile Include="Assets\Actors\Player.cs" />
      <Compile Include="Assets\Physics\Controls.cs" />
      <Compile Include="Assets\Physics\Direction.cs" />
@@ -64,6 +65,7 @@
      <Compile Include="Assets\Text + UI\Dialogue.cs" />
      <Compile Include="Assets\Text + UI\GameState.cs" />
      <Compile Include="Assets\Text + UI\Interface.cs" />
+     <Compile Include="Assets\Text + UI\Vendor.cs" />
      <None Include="Assets\Packages\Old School Modern\readme_OldSchoolModern.txt" />
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>C:/Users/kbailey/Documents/Dragonbook/HeritageFinal/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
