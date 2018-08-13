@@ -26,7 +26,8 @@ public class Dialogue : Interaction
     // Variables:
     public string dialogue; // The dialogue typed in the editor's component
     public bool playerInitiatesDialogue;    // If true, the script listens for the player's button press
-
+    public string option1String;
+    public string option2String;
     private string currDialogue;    // String currently shown in the text box
     private int scrollSpeed; // Const scroll speed plus/minus modifiers
     private IEnumerator _scrollText;
@@ -35,8 +36,16 @@ public class Dialogue : Interaction
     private bool instantScroll;
     private bool newText;
     private bool advanceMarker;
+    private bool option1;
+    private bool option2;
     private string textCount;
     private int dialogueIndex;
+
+    public void beginDialogue()
+    {
+        _scrollText = scrollText();
+        StartCoroutine(_scrollText);
+    }
 
     // Functions:
     private int parseText(int index)
@@ -80,6 +89,28 @@ public class Dialogue : Interaction
                 break;
             case 'N':
                 newText = true;
+                index++;
+                break;
+            case 'O':
+                if (!option1 && !option2)   // Option text display
+                {
+                    option1 = true;
+                    newText = true;
+                }
+                else if (option1 && !option2) // Option 1 text
+                {
+                    option1 = false;
+                    option2 = true;
+                }
+                else if (!option1 && option2) // Option 2 text
+                {
+                    option1 = true;
+                }
+                else if (option1 && option2)    // End Option text
+                {
+                    option1 = false;
+                    option2 = false;
+                }
                 index++;
                 break;
         }
@@ -184,6 +215,14 @@ public class Dialogue : Interaction
                 currDialogue += '\n';
             }
             newBox:
+            if (option1 && !option2)
+            {
+                // Display
+                Interface.dialogueOption1.color = new Color(1, 1, 0, 1);    // yellow text indicates what is selected
+                Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
+                
+
+            }
             Interface.dialogueAdvanceSprite.enabled = true;
             bool fadingIn = true;
             Interface.dialogueAdvanceSprite.color = new
@@ -247,16 +286,5 @@ public class Dialogue : Interaction
     }
     void Update()
     {
-        if (playerInitiatesDialogue && !dialogueRunning)
-        {
-
-        }
-
-        if (Input.GetKeyDown(Controls.buttonA) && !dialogueRunning && playerInitiatesDialogue)
-        {
-            _scrollText = scrollText();
-            StartCoroutine(_scrollText);
-        }
-       
     }
 }

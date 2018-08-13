@@ -15,11 +15,15 @@ public class Interface : MonoBehaviour {
     public static Text dialogueNameBox;
     public static Text dialogueTextBox;
     public static Image dialogueAdvanceSprite;
+    public static Text dialogueOption1;
+    public static Text dialogueOption2;
 
     public Image _dialogueTextBoxImage;
     public Text _dialogueNameBox;
     public Text _dialogueTextBox;
     public Image _dialogueAdvanceSprite;
+    public Text _dialogueOption1;
+    public Text _dialogueOption2;
 
 	// Use this for initialization
 	void Start () {
@@ -27,6 +31,8 @@ public class Interface : MonoBehaviour {
         dialogueTextBox = _dialogueTextBox;
         dialogueNameBox = _dialogueNameBox;
         dialogueAdvanceSprite = _dialogueAdvanceSprite;
+        dialogueOption1 = _dialogueOption1;
+        dialogueOption2 = _dialogueOption2;
         Interaction.interacting = false;
 	}
 	

@@ -19,10 +19,10 @@ public class Interaction : MonoBehaviour {
     const float MAX_DISTANCE = 1f;
 
     public static bool interacting;
-    public GameObject[] interactiveObjects;
-    public float[] interactiveObjectDistances;
-    public enum interactionType {dialogue, vendor};
-
+    private GameObject[] interactiveObjects;
+    private float[] interactiveObjectDistances;
+    public enum InteractionType {dialogue, vendor, option};
+    public InteractionType[] interactionType;
 
     protected void startInteraction()
     {
@@ -126,6 +126,19 @@ public class Interaction : MonoBehaviour {
                     if (closestObject == gameObject)    // If this is the closest object, begin interaction
                     {
                         // Begin interaction
+                        for (int i = 0; i < interactionType.Length; i++)
+                        {
+                            switch (interactionType[i])
+                            {
+                                case InteractionType.dialogue:
+                                    
+                                    break;
+                                case InteractionType.option:
+                                    break;
+                                case InteractionType.vendor:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
