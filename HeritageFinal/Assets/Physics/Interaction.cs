@@ -19,9 +19,8 @@ public class Interaction : MonoBehaviour {
     const float MAX_DISTANCE = 1f;
 
     public static bool interacting;
-    private GameObject[] interactiveObjects;
     private float[] interactiveObjectDistances;
-    public enum InteractionType {dialogue, vendor, option};
+    public enum InteractionType {dialogue, vendor};
     public InteractionType[] interactionType;
 
     protected void startInteraction()
@@ -30,16 +29,15 @@ public class Interaction : MonoBehaviour {
     }
 
     private Player getPlayer()
-    {
-        Player[] players = GetComponents<Player>();
-        for (int i = 0; i < players.Length; i++)
+    {     
+        foreach (Player players in Resources.FindObjectsOfTypeAll(typeof(Player)) as Player[])
         {
-            if (players[i].controllable)
+            if (players.controllable)
             {
-                return players[i];
+                return players;
             }
         }
-        return players[0];  // This should never run
+        return null;  // This should never run
     }
 
     private bool checkDirection(Player player, GameObject obj)   // Check if the player is facing the object
@@ -60,6 +58,10 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.y < objPos.y)
             {
+                if (gameObject.GetComponent<SpriteAnimation>() != null)
+                {
+                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().downMovementFrames);
+                }
                 return true;
             }
         }
@@ -67,6 +69,10 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.x > objPos.x)
             {
+                if (gameObject.GetComponent<SpriteAnimation>() != null)
+                {
+                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().rightMovementFrames);
+                }
                 return true;
             }
         }
@@ -74,6 +80,10 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.x < objPos.x)
             {
+                if (gameObject.GetComponent<SpriteAnimation>() != null)
+                {
+                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().leftMovementFrames);
+                }
                 return true;
             }
         }
@@ -81,6 +91,10 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.y > objPos.y)
             {
+                if (gameObject.GetComponent<SpriteAnimation>() != null)
+                {
+                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().upMovementFrames);
+                }
                 return true;
             }
         }
@@ -93,7 +107,7 @@ public class Interaction : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKey(Controls.buttonA))   // First, the game checks if button a is pressed
+		if (Input.GetKeyDown(Controls.buttonA) && !interacting)   // First, the game checks if button a is pressed
         {
             if (Vector3.Distance(getPlayer().gameObject.GetComponent<Rigidbody2D>().position, gameObject.GetComponent<Rigidbody2D>().position) <= MAX_DISTANCE)     // Then checks if the player is close enough
             {
@@ -102,38 +116,55 @@ public class Interaction : MonoBehaviour {
                     GameObject closestObject = gameObject;
                     float closestLength = MAX_DISTANCE;
                     int interactiveObjectIndex = 0;
-                    foreach (GameObject objs in Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[]) // Add all objects to array
+                    float interactionDistance;
+                    foreach (Interaction interactiveObjects in Resources.FindObjectsOfTypeAll(typeof(Interaction)) as Interaction[])
                     {
-                        if (objs.GetComponent<Interaction>() != null)   // Filter to objects with Interaction component
+                        if (checkDirection(getPlayer(), interactiveObjects.gameObject))
                         {
-                            if (checkDirection(getPlayer(), objs))  // Filter further to objects that the player is facing
+                            interactionDistance = Vector3.Distance(getPlayer().gameObject.GetComponent<Rigidbody2D>().position,
+                                interactiveObjects.GetComponent<Rigidbody2D>().position);
+                            if (interactionDistance < closestLength)
                             {
-                                interactiveObjects[interactiveObjectIndex] = objs;
-                                interactiveObjectIndex++;
+                                closestLength = interactionDistance;
+                                closestObject = interactiveObjects.gameObject;
                             }
                         }
                     }
-                    for (int i = 0; i < interactiveObjects.Length; i++) // Find the closest object to the player
-                    {
-                        interactiveObjectDistances[i] = Vector3.Distance(getPlayer().gameObject.GetComponent<Rigidbody2D>().position,
-                            interactiveObjects[i].GetComponent<Rigidbody2D>().position);
-                        if (interactiveObjectDistances[i] < closestLength)
+                        /*
+                        foreach (GameObject objs in Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[]) // Add all objects to array
                         {
-                            closestLength = interactiveObjectDistances[i];
-                            closestObject = interactiveObjects[i];
+                            if (objs.GetComponent<Interaction>() != null)   // Filter to objects with Interaction component
+                            {
+                                if (checkDirection(getPlayer(), objs))  // Filter further to objects that the player is facing
+                                {
+                                    interactiveObjects[interactiveObjectIndex] = objs;
+                                    interactiveObjectIndex++;
+                                }
+                            }
                         }
-                    }
-                    if (closestObject == gameObject)    // If this is the closest object, begin interaction
+                        for (int i = 0; i < interactiveObjects.Length; i++) // Find the closest object to the player
+                        {
+                            interactiveObjectDistances[i] = Vector3.Distance(getPlayer().gameObject.GetComponent<Rigidbody2D>().position,
+                                interactiveObjects[i].GetComponent<Rigidbody2D>().position);
+                            if (interactiveObjectDistances[i] < closestLength)
+                            {
+                                closestLength = interactiveObjectDistances[i];
+                                closestObject = interactiveObjects[i];
+                            }
+                        }
+                        */
+                        if (closestObject == gameObject)    // If this is the closest object, begin interaction
                     {
                         // Begin interaction
+                        GameState.setState(GameState.gameState.paused);
+                        interacting = true;
                         for (int i = 0; i < interactionType.Length; i++)
                         {
+                            getPlayer().gameObject.GetComponent<Movement>().move(Direction.IDLE, 0, 0);
                             switch (interactionType[i])
                             {
                                 case InteractionType.dialogue:
-                                    
-                                    break;
-                                case InteractionType.option:
+                                    gameObject.GetComponent<Dialogue>().beginDialogue();                                    
                                     break;
                                 case InteractionType.vendor:
                                     break;

@@ -63,6 +63,7 @@
      <Compile Include="Assets\Physics\Movement.cs" />
      <Compile Include="Assets\Physics\SpriteAnimation.cs" />
      <Compile Include="Assets\Text + UI\Dialogue.cs" />
+     <Compile Include="Assets\Text + UI\DialogueOption.cs" />
      <Compile Include="Assets\Text + UI\GameState.cs" />
      <Compile Include="Assets\Text + UI\Interface.cs" />
      <Compile Include="Assets\Text + UI\Vendor.cs" />

@@ -26,11 +26,6 @@ public class Player : Character {
 	void Start () {
         Dialogue.dialogueRunning = false;
         interactiveIndex = 0;
-        if (defaultSpeeds)
-        {
-            movementSpeed = DEFAULT_MOVEMENT_SPEED;
-            animationSpeed = DEFAULT_ANIMATION_SPEED;
-        }
     }
 	
     public void stopPlayerControl()

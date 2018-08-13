@@ -62,7 +62,7 @@ public class GameState : MonoBehaviour {
     }
 
 	void Start () {
-		
+        setState(gameState.overworld);
 	}
 	
 	// Update is called once per frame

@@ -19,9 +19,11 @@ public class Dialogue : Interaction
     const float MAX_DISTANCE = 2f;     // For dialogue initiated by the player 
     const int SCROLL_SPEED = 2; // How many frames pass before text scroll
     const int SCROLL_AMT = 1;   // How many characters per text scroll
-    const int CHARACTERS_PER_LINE = 40; // How many characters can fit on a single line of text
+    const int CHARACTERS_PER_LINE = 80; // How many characters can fit on a single line of text
     const int LINES_PER_BOX = 4; // How many lines in each text box
     const float TEXT_ADVANCE_BREATHE_RATE = 0.1f;
+    const string OPTION_1_DEFAULT = "Yes";
+    const string OPTION_2_DEFAULT = "No";
 
     // Variables:
     public string dialogue; // The dialogue typed in the editor's component
@@ -38,6 +40,7 @@ public class Dialogue : Interaction
     private bool advanceMarker;
     private bool option1;
     private bool option2;
+    private bool option1Selected = true;
     private string textCount;
     private int dialogueIndex;
 
@@ -50,10 +53,11 @@ public class Dialogue : Interaction
     // Functions:
     private int parseText(int index)
     {
-        // [W10][W] - wait ten frames
+        // [Wn][W] - wait n frames (n = positive integer)
         // [L] - lock scrolling speed
         // [I] - instant scroll
         // [N] - new text box
+        // [O] - new option text box
         textCount += dialogue[index];
         index++;
         textCount += dialogue[index];
@@ -99,11 +103,29 @@ public class Dialogue : Interaction
                 }
                 else if (option1 && !option2) // Option 1 text
                 {
+                    if (!option1Selected)
+                    {
+                        instantScroll = true;
+                    }
+                    else
+                    {
+                        Interface.dialogueTextBox.text = "";
+                        instantScroll = false;
+                    }
                     option1 = false;
                     option2 = true;
                 }
                 else if (!option1 && option2) // Option 2 text
                 {
+                    if (!option1Selected)
+                    {
+                        Interface.dialogueTextBox.text = "";
+                        instantScroll = false;
+                    }
+                    else
+                    {
+                        instantScroll = true;
+                    }
                     option1 = true;
                 }
                 else if (option1 && option2)    // End Option text
@@ -158,6 +180,8 @@ public class Dialogue : Interaction
         Interface.dialogueTextBox.enabled = true;
         Interface.dialogueNameBox.enabled = true;
         Interface.dialogueAdvanceSprite.enabled = false;
+        Interface.dialogueOption1.enabled = false;
+        Interface.dialogueOption2.enabled = false;
         for (int i = 0; textCount != dialogue; i++)
         {
             currDialogue = "";
@@ -214,63 +238,124 @@ public class Dialogue : Interaction
                 }
                 currDialogue += '\n';
             }
-            newBox:
+        newBox:
             if (option1 && !option2)
             {
                 // Display
                 Interface.dialogueOption1.color = new Color(1, 1, 0, 1);    // yellow text indicates what is selected
                 Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
-                
+                bool optionAnswered = false;
+                for (int j = 0; j < OPTION_1_DEFAULT.Length; j++)
+                {
+                    Interface.dialogueOption1.text += OPTION_1_DEFAULT[j];
+                    for (int l = 0; l < scrollSpeed; l++)
+                    {
+                        yield return new WaitForEndOfFrame();
+                    }
+                }
+                for (int l = 0; l < scrollSpeed + 10; l++)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
+                for (int j = 0; j < OPTION_2_DEFAULT.Length; j++)
+                {
+                    Interface.dialogueOption2.text += OPTION_2_DEFAULT[j];
+                    for (int l = 0; l < scrollSpeed; l++)
+                    {
+                        yield return new WaitForEndOfFrame();
+                    }
+                }
+                while (!optionAnswered)
+                {
+                    Interface.dialogueOption1.color = new Color(1, 1, 0, 1);    // yellow text indicates what is selected
+                    Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
+                    while (option1Selected)
+                    {
+                        if (Input.GetKeyDown(Controls.right))
+                        {
+                            option1Selected = false;
+                        }
+                        else if (Input.GetKeyDown(Controls.buttonA))
+                        {
+                            optionAnswered = true;
+                        }
+                        yield return new WaitForEndOfFrame();
+                    }
+                    if (optionAnswered) break;
+                    Interface.dialogueOption1.color = new Color(1, 1, 1, 1);
+                    Interface.dialogueOption2.color = new Color(1, 1, 0, 1);
+                    while (!option1Selected)
+                    {
+                        if (Input.GetKeyDown(Controls.left))
+                        {
+                            option1Selected = true;
+                        }
+                        else if (Input.GetKeyDown(Controls.buttonA))
+                        {
+                            optionAnswered = true;
+                        }
+                        yield return new WaitForEndOfFrame();
+                    }
+                }
 
             }
-            Interface.dialogueAdvanceSprite.enabled = true;
-            bool fadingIn = true;
-            Interface.dialogueAdvanceSprite.color = new
-                Color(Interface.dialogueAdvanceSprite.color.r,
-                      Interface.dialogueAdvanceSprite.color.g,
-                      Interface.dialogueAdvanceSprite.color.b, 0);
-            while (advanceMarker)
+            else
             {
-                if (Interface.dialogueAdvanceSprite.color.a <= 0)
+                Interface.dialogueAdvanceSprite.enabled = true;
+                bool fadingIn = true;
+                Interface.dialogueAdvanceSprite.color = new
+                    Color(Interface.dialogueAdvanceSprite.color.r,
+                          Interface.dialogueAdvanceSprite.color.g,
+                          Interface.dialogueAdvanceSprite.color.b, 0);
+                while (advanceMarker)
                 {
-                    fadingIn = true;
-                }
-                else if (Interface.dialogueAdvanceSprite.color.a >= 1)
-                {
-                    fadingIn = false;
-                }
+                    if (Interface.dialogueAdvanceSprite.color.a <= 0)
+                    {
+                        fadingIn = true;
+                    }
+                    else if (Interface.dialogueAdvanceSprite.color.a >= 1)
+                    {
+                        fadingIn = false;
+                    }
 
-                if (fadingIn)
-                {
-                    Interface.dialogueAdvanceSprite.color = new
-                        Color(Interface.dialogueAdvanceSprite.color.r,
-                              Interface.dialogueAdvanceSprite.color.g,
-                              Interface.dialogueAdvanceSprite.color.b,
-                              Interface.dialogueAdvanceSprite.color.a + TEXT_ADVANCE_BREATHE_RATE);
+                    if (fadingIn)
+                    {
+                        Interface.dialogueAdvanceSprite.color = new
+                            Color(Interface.dialogueAdvanceSprite.color.r,
+                                  Interface.dialogueAdvanceSprite.color.g,
+                                  Interface.dialogueAdvanceSprite.color.b,
+                                  Interface.dialogueAdvanceSprite.color.a + TEXT_ADVANCE_BREATHE_RATE);
+                    }
+                    else
+                    {
+                        Interface.dialogueAdvanceSprite.color = new
+                            Color(Interface.dialogueAdvanceSprite.color.r,
+                            Interface.dialogueAdvanceSprite.color.g,
+                            Interface.dialogueAdvanceSprite.color.b,
+                            Interface.dialogueAdvanceSprite.color.a - TEXT_ADVANCE_BREATHE_RATE);
+                    }
+                    if (Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB))
+                    {
+                        advanceMarker = false;
+                    }
+                    yield return new WaitForEndOfFrame();
                 }
-                else
-                {
-                    Interface.dialogueAdvanceSprite.color = new
-                        Color(Interface.dialogueAdvanceSprite.color.r,
-                        Interface.dialogueAdvanceSprite.color.g,
-                        Interface.dialogueAdvanceSprite.color.b,
-                        Interface.dialogueAdvanceSprite.color.a - TEXT_ADVANCE_BREATHE_RATE);
-                }
-                if (Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB))
-                {
-                    advanceMarker = false;
-                }
-                yield return new WaitForEndOfFrame();
+                advanceMarker = true;
+                Interface.dialogueAdvanceSprite.enabled = false;
             }
-            advanceMarker = true;
-            Interface.dialogueAdvanceSprite.enabled = false;
         }
         Interface.dialogueTextBoxImage.enabled = false;
         Interface.dialogueTextBox.enabled = false;
         Interface.dialogueNameBox.enabled = false;
+        Interface.dialogueOption1.enabled = false;
+        Interface.dialogueOption2.enabled = false;
         textCount = "";
         dialogueRunning = false;
         dialogueIndex = 0;
+        interacting = false;
+        gameObject.GetComponent<SpriteAnimation>().stopAnimation();
+        gameObject.GetComponent<SpriteRenderer>().sprite = gameObject.GetComponent<SpriteAnimation>().currentSprites[0];
+        GameState.setState(GameState.gameState.overworld);
         yield return new WaitForEndOfFrame();
     }
     void Start()

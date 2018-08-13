@@ -19,6 +19,11 @@ public class Character : Actor {
 
     // Use this for initialization
     void Start () {
+        if (defaultSpeeds)
+        {
+            movementSpeed = DEFAULT_MOVEMENT_SPEED;
+            animationSpeed = DEFAULT_ANIMATION_SPEED;
+        }
     }
 	
 	// Update is called once per frame

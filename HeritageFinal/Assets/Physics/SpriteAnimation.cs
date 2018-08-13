@@ -137,17 +137,18 @@ public class SpriteAnimation : MonoBehaviour {
         int spritePos = 0;
         while (coroutineRunning)
         {
+            if (!coroutineRunning) break;
             spritePos++;
             if (spritePos == currentSprites.Length)
             {
                 spritePos = 0;
             }
             gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
-            for (int i = 0; i <= gameObject.GetComponent<Player>().animationSpeed; i++)
+            for (int i = 0; i <= gameObject.GetComponent<Character>().animationSpeed; i++)
             {
-                if (!coroutineRunning) break;
+                //if (!coroutineRunning) break;
                 yield return new WaitForEndOfFrame();
-            }
+            }            
         }
     }
 	
