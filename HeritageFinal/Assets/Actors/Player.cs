@@ -20,12 +20,10 @@ public class Player : Character {
     public int linePlacement;   // 1 is the controllable character
 
     public Object[] interactiveNPCs;
-    private int interactiveIndex;
 
 	// Use this for initialization
 	void Start () {
         Dialogue.dialogueRunning = false;
-        interactiveIndex = 0;
     }
 	
     public void stopPlayerControl()

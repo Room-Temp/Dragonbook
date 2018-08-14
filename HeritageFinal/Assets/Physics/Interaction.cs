@@ -53,13 +53,13 @@ public class Interaction : MonoBehaviour {
         }
         Vector2 playerPos = player.gameObject.GetComponent<Rigidbody2D>().position;
         Vector2 objPos = obj.GetComponent<Rigidbody2D>().position;
-
         if (playerDir == Direction.UP || playerDir == Direction.UP_LEFT || playerDir == Direction.UP_RIGHT)
         {
             if (playerPos.y < objPos.y)
             {
                 if (gameObject.GetComponent<SpriteAnimation>() != null)
                 {
+                    
                     gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().downMovementFrames);
                 }
                 return true;
@@ -115,7 +115,6 @@ public class Interaction : MonoBehaviour {
                 {
                     GameObject closestObject = gameObject;
                     float closestLength = MAX_DISTANCE;
-                    int interactiveObjectIndex = 0;
                     float interactionDistance;
                     foreach (Interaction interactiveObjects in Resources.FindObjectsOfTypeAll(typeof(Interaction)) as Interaction[])
                     {
@@ -130,30 +129,7 @@ public class Interaction : MonoBehaviour {
                             }
                         }
                     }
-                        /*
-                        foreach (GameObject objs in Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[]) // Add all objects to array
-                        {
-                            if (objs.GetComponent<Interaction>() != null)   // Filter to objects with Interaction component
-                            {
-                                if (checkDirection(getPlayer(), objs))  // Filter further to objects that the player is facing
-                                {
-                                    interactiveObjects[interactiveObjectIndex] = objs;
-                                    interactiveObjectIndex++;
-                                }
-                            }
-                        }
-                        for (int i = 0; i < interactiveObjects.Length; i++) // Find the closest object to the player
-                        {
-                            interactiveObjectDistances[i] = Vector3.Distance(getPlayer().gameObject.GetComponent<Rigidbody2D>().position,
-                                interactiveObjects[i].GetComponent<Rigidbody2D>().position);
-                            if (interactiveObjectDistances[i] < closestLength)
-                            {
-                                closestLength = interactiveObjectDistances[i];
-                                closestObject = interactiveObjects[i];
-                            }
-                        }
-                        */
-                        if (closestObject == gameObject)    // If this is the closest object, begin interaction
+                    if (closestObject == gameObject)    // If this is the closest object, begin interaction
                     {
                         // Begin interaction
                         GameState.setState(GameState.gameState.paused);

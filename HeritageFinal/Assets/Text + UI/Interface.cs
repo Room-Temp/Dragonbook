@@ -33,8 +33,17 @@ public class Interface : MonoBehaviour {
         dialogueAdvanceSprite = _dialogueAdvanceSprite;
         dialogueOption1 = _dialogueOption1;
         dialogueOption2 = _dialogueOption2;
+        dialogueTextBoxImage.enabled = false;
+        dialogueTextBox.enabled = false;
+        dialogueNameBox.enabled = false;
+        dialogueAdvanceSprite.enabled = false;
+        dialogueOption1.enabled = false;
+        dialogueOption2.enabled = false;
+
         Interaction.interacting = false;
-	}
+
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
