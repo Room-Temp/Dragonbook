@@ -30,9 +30,11 @@ public class SpriteAnimation : MonoBehaviour {
 
     private IEnumerator animate;
     private bool coroutineRunning;
-   
+    private int spritePos;
+
 
     void Start () {
+        spritePos = 0;
         coroutineRunning = false;
         gameObject.GetComponent<SpriteRenderer>().sprite = defaultSprite;
 	}
@@ -83,7 +85,7 @@ public class SpriteAnimation : MonoBehaviour {
         StartCoroutine(animate);
     }
 
-    public void startAnimation(Sprite[] sprites) //Cutscene animations can be passed through this overload function
+    public void startAnimation(Sprite[] sprites) //Specific animations can be passed through this overload function
     {
         currentSprites = sprites;
         startAnimation();
@@ -134,22 +136,22 @@ public class SpriteAnimation : MonoBehaviour {
 
     private IEnumerator _animate()
     {
-        int spritePos = 0;
-        while (coroutineRunning)
-        {
-            if (!coroutineRunning) break;
-            spritePos++;
-            if (spritePos == currentSprites.Length)
+            while (true)
             {
-                spritePos = 0;
+                if (!coroutineRunning) break;
+                spritePos++;
+                if (spritePos == currentSprites.Length)
+                {
+                    spritePos = 0;
+                }
+                gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
+                for (int i = 0; i <= gameObject.GetComponent<Character>().animationSpeed; i++)
+                {
+                    if (!coroutineRunning) break;
+                    yield return new WaitForEndOfFrame();
+                }
             }
-            gameObject.GetComponent<SpriteRenderer>().sprite = currentSprites[spritePos];
-            for (int i = 0; i <= gameObject.GetComponent<Character>().animationSpeed; i++)
-            {
-                //if (!coroutineRunning) break;
-                yield return new WaitForEndOfFrame();
-            }            
-        }
+        
     }
 	
 	// Update is called once per frame

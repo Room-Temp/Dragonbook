@@ -6,11 +6,11 @@ public class Actor : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)gameObject.GetComponent<Transform>().position.y;
+
 	}
 }

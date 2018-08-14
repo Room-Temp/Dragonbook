@@ -58,6 +58,6 @@ public class Player : Character {
             gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
 
         }
-        
-	}
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)(gameObject.GetComponent<Transform>().position.y * 1000);
+    }
 }

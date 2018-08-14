@@ -19,7 +19,7 @@ public class Dialogue : Interaction
     const float MAX_DISTANCE = 2f;     // For dialogue initiated by the player 
     const int SCROLL_SPEED = 2; // How many frames pass before text scroll
     const int SCROLL_AMT = 1;   // How many characters per text scroll
-    const int CHARACTERS_PER_LINE = 80; // How many characters can fit on a single line of text
+    const int CHARACTERS_PER_LINE = 60; // How many characters can fit on a single line of text
     const int LINES_PER_BOX = 4; // How many lines in each text box
     const float TEXT_ADVANCE_BREATHE_RATE = 0.1f;
     const string OPTION_1_DEFAULT = "Yes";
@@ -278,6 +278,7 @@ public class Dialogue : Interaction
                         else if (Input.GetKeyDown(Controls.buttonA))
                         {
                             optionAnswered = true;
+                            // TODO: branching scripts using an option
                         }
                         yield return new WaitForEndOfFrame();
                     }

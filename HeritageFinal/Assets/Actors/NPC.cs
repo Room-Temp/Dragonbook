@@ -34,6 +34,6 @@ public class NPC : Character {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)(gameObject.GetComponent<Transform>().position.y * 1000);
+    }
 }
