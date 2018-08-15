@@ -57,11 +57,6 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.y < objPos.y)
             {
-                if (gameObject.GetComponent<SpriteAnimation>() != null)
-                {
-                    
-                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().downMovementFrames);
-                }
                 return true;
             }
         }
@@ -69,10 +64,6 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.x > objPos.x)
             {
-                if (gameObject.GetComponent<SpriteAnimation>() != null)
-                {
-                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().rightMovementFrames);
-                }
                 return true;
             }
         }
@@ -80,10 +71,6 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.x < objPos.x)
             {
-                if (gameObject.GetComponent<SpriteAnimation>() != null)
-                {
-                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().leftMovementFrames);
-                }
                 return true;
             }
         }
@@ -91,10 +78,6 @@ public class Interaction : MonoBehaviour {
         {
             if (playerPos.y > objPos.y)
             {
-                if (gameObject.GetComponent<SpriteAnimation>() != null)
-                {
-                    gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().upMovementFrames);
-                }
                 return true;
             }
         }
@@ -140,6 +123,38 @@ public class Interaction : MonoBehaviour {
                             switch (interactionType[i])
                             {
                                 case InteractionType.dialogue:
+                                    if (gameObject.GetComponent<SpriteAnimation>() != null)
+                                    {
+                                        int playerDir;
+                                        if (getPlayer().gameObject.GetComponent<Movement>().direction == Direction.IDLE)
+                                        {
+                                            playerDir = getPlayer().gameObject.GetComponent<Movement>().prevDir;
+                                        }
+                                        else
+                                        {
+                                            playerDir = getPlayer().gameObject.GetComponent<Movement>().direction;
+                                        }
+                                        if (playerDir == Direction.UP_RIGHT ||
+                                            playerDir == Direction.UP ||
+                                            playerDir == Direction.UP_LEFT)
+                                        {
+                                            gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().downMovementFrames);
+                                        }
+                                        else if (playerDir == Direction.LEFT)
+                                        {
+                                            gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().rightMovementFrames);
+                                        }
+                                        else if (playerDir == Direction.DOWN_LEFT ||
+                                                 playerDir == Direction.DOWN ||
+                                                 playerDir == Direction.DOWN_RIGHT)
+                                        {
+                                            gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().upMovementFrames);
+                                        }
+                                        else if (playerDir == Direction.RIGHT)
+                                        {
+                                            gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().leftMovementFrames);
+                                        }
+                                    }
                                     gameObject.GetComponent<Dialogue>().beginDialogue();                                    
                                     break;
                                 case InteractionType.vendor:
