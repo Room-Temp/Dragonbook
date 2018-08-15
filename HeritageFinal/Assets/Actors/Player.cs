@@ -22,7 +22,8 @@ public class Player : Character {
     public Object[] interactiveNPCs;
 
 	// Use this for initialization
-	void Start () {
+	protected override void Start () {
+        base.Start();
         Dialogue.dialogueRunning = false;
     }
 	
@@ -36,7 +37,7 @@ public class Player : Character {
     }
 
 	// Update is called once per frame
-	void Update () {
+	protected override void Update () {
         up = Input.GetKey(Controls.up);
         down = Input.GetKey(Controls.down);
         left = Input.GetKey(Controls.left);
@@ -54,8 +55,7 @@ public class Player : Character {
             else if (up && !down && left && !right) direction = Direction.UP_LEFT;
             else direction = Direction.IDLE;
             gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
-
         }
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)(gameObject.GetComponent<Transform>().position.y * 1000);
+        base.Update();
     }
 }

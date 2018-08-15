@@ -5,12 +5,12 @@ using UnityEngine;
 public class Actor : MonoBehaviour {
 
 	// Use this for initialization
-	void Start () {
+	protected virtual void Start () {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)gameObject.GetComponent<Transform>().position.y;
+	protected virtual void Update () {
+        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)(gameObject.GetComponent<Transform>().position.y * 1000);
 
-	}
+    }
 }

@@ -9,12 +9,8 @@ public class NPC : Character {
         Type: Object Script
         Purpose: An NPC is a non-controllable character that is not in the player's party or an enemy.
     */
-	void Start () {
-        if (defaultSpeeds)
-        {
-            movementSpeed = DEFAULT_MOVEMENT_SPEED;
-            animationSpeed = DEFAULT_ANIMATION_SPEED;
-        }
+	protected override void Start () {
+        base.Start();
         switch (direction)  // Direction of an NPC is initially set in the editor. It should always be in a cardinal direction
         {
             case (Direction.UP):
@@ -33,7 +29,7 @@ public class NPC : Character {
     }
 	
 	// Update is called once per frame
-	void Update () {
-        gameObject.GetComponent<SpriteRenderer>().sortingOrder = -(int)(gameObject.GetComponent<Transform>().position.y * 1000);
+	protected override void Update () {
+        base.Update();
     }
 }
