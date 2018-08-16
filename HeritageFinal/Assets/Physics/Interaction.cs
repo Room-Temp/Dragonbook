@@ -55,28 +55,28 @@ public class Interaction : MonoBehaviour {
         Vector2 objPos = obj.GetComponent<Rigidbody2D>().position;
         if (playerDir == Direction.UP || playerDir == Direction.UP_LEFT || playerDir == Direction.UP_RIGHT)
         {
-            if (playerPos.y < objPos.y)
+            if (obj.GetComponent<Character>().downInteractionTrigger.bounds.Contains(playerPos))
             {
                 return true;
             }
         }
         else if (playerDir == Direction.LEFT || playerDir == Direction.UP_LEFT || playerDir == Direction.DOWN_LEFT)
         {
-            if (playerPos.x > objPos.x)
+            if (obj.GetComponent<Character>().rightInteractionTrigger.bounds.Contains(playerPos))
             {
                 return true;
             }
         }
         else if (playerDir == Direction.RIGHT || playerDir == Direction.UP_RIGHT || playerDir == Direction.DOWN_RIGHT)
         {
-            if (playerPos.x < objPos.x)
+            if (obj.GetComponent<Character>().leftInteractionTrigger.bounds.Contains(playerPos))
             {
                 return true;
             }
         }
         else if (playerDir == Direction.DOWN || playerDir == Direction.DOWN_RIGHT || playerDir == Direction.DOWN_LEFT)
         {
-            if (playerPos.y > objPos.y)
+            if (obj.GetComponent<Character>().upInteractionTrigger.bounds.Contains(playerPos))
             {
                 return true;
             }
