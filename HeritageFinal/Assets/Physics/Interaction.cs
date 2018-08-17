@@ -51,33 +51,37 @@ public class Interaction : MonoBehaviour {
         {
             playerDir = player.gameObject.GetComponent<Movement>().direction;
         }
-        Vector2 playerPos = player.gameObject.GetComponent<Rigidbody2D>().position;
+        Vector2 playerPos = player.gameObject.GetComponent<Transform>().position;
         Vector2 objPos = obj.GetComponent<Rigidbody2D>().position;
         if (playerDir == Direction.UP || playerDir == Direction.UP_LEFT || playerDir == Direction.UP_RIGHT)
         {
-            if (obj.GetComponent<Character>().downInteractionTrigger.bounds.Contains(playerPos))
+            if (obj.GetComponent<NPC>().downInteractionTrigger.bounds.Contains(playerPos))
             {
+                Debug.Log("Down");
                 return true;
             }
         }
         else if (playerDir == Direction.LEFT || playerDir == Direction.UP_LEFT || playerDir == Direction.DOWN_LEFT)
         {
-            if (obj.GetComponent<Character>().rightInteractionTrigger.bounds.Contains(playerPos))
+            if (obj.GetComponent<NPC>().rightInteractionTrigger.bounds.Contains(playerPos))
             {
+                Debug.Log("right");
                 return true;
             }
         }
         else if (playerDir == Direction.RIGHT || playerDir == Direction.UP_RIGHT || playerDir == Direction.DOWN_RIGHT)
         {
-            if (obj.GetComponent<Character>().leftInteractionTrigger.bounds.Contains(playerPos))
+            if (obj.GetComponent<NPC>().leftInteractionTrigger.bounds.Contains(playerPos))
             {
+                Debug.Log("left");
                 return true;
             }
         }
         else if (playerDir == Direction.DOWN || playerDir == Direction.DOWN_RIGHT || playerDir == Direction.DOWN_LEFT)
         {
-            if (obj.GetComponent<Character>().upInteractionTrigger.bounds.Contains(playerPos))
+            if (obj.GetComponent<NPC>().upInteractionTrigger.bounds.Contains(playerPos))
             {
+                Debug.Log("up");
                 return true;
             }
         }
