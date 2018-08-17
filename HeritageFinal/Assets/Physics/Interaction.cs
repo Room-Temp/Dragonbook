@@ -51,37 +51,24 @@ public class Interaction : MonoBehaviour {
         {
             playerDir = player.gameObject.GetComponent<Movement>().direction;
         }
-        Vector2 playerPos = player.gameObject.GetComponent<Transform>().position;
-        Vector2 objPos = obj.GetComponent<Rigidbody2D>().position;
-        if (playerDir == Direction.UP || playerDir == Direction.UP_LEFT || playerDir == Direction.UP_RIGHT)
+        InteractionCollider[] colliders = obj.GetComponentsInChildren<InteractionCollider>();
+        /*
+        BoxCollider2D left = obj.GetComponent<Character>().setInteractionTriggers(Direction.LEFT);
+        BoxCollider2D right = obj.GetComponent<Character>().setInteractionTriggers(Direction.RIGHT);
+        BoxCollider2D up = obj.GetComponent<Character>().setInteractionTriggers(Direction.UP);
+        BoxCollider2D down = obj.GetComponent<Character>().setInteractionTriggers(Direction.DOWN);
+        Bounds playerBounds = player.gameObject.GetComponent<BoxCollider2D>().bounds;
+        Vector2 playerPos = playerBounds.center;
+        Vector2 objPos = player.gameObject.GetComponent<BoxCollider2D>().bounds.center;
+        Bounds objBounds;
+        */
+        for (int i = 0; i < colliders.Length; i++)
         {
-            if (obj.GetComponent<NPC>().downInteractionTrigger.bounds.Contains(playerPos))
+            if (((playerDir == Direction.UP || playerDir == Direction.UP_LEFT || playerDir == Direction.UP_RIGHT) && colliders[i].isTriggered(Direction.DOWN)) ||
+                ((playerDir == Direction.LEFT || playerDir == Direction.UP_LEFT || playerDir == Direction.DOWN_LEFT) && colliders[i].isTriggered(Direction.RIGHT)) ||
+                ((playerDir == Direction.RIGHT || playerDir == Direction.UP_RIGHT || playerDir == Direction.DOWN_RIGHT) && colliders[i].isTriggered(Direction.LEFT)) ||
+                ((playerDir == Direction.DOWN || playerDir == Direction.DOWN_LEFT || playerDir == Direction.DOWN_RIGHT) && colliders[i].isTriggered(Direction.UP)))
             {
-                Debug.Log("Down");
-                return true;
-            }
-        }
-        else if (playerDir == Direction.LEFT || playerDir == Direction.UP_LEFT || playerDir == Direction.DOWN_LEFT)
-        {
-            if (obj.GetComponent<NPC>().rightInteractionTrigger.bounds.Contains(playerPos))
-            {
-                Debug.Log("right");
-                return true;
-            }
-        }
-        else if (playerDir == Direction.RIGHT || playerDir == Direction.UP_RIGHT || playerDir == Direction.DOWN_RIGHT)
-        {
-            if (obj.GetComponent<NPC>().leftInteractionTrigger.bounds.Contains(playerPos))
-            {
-                Debug.Log("left");
-                return true;
-            }
-        }
-        else if (playerDir == Direction.DOWN || playerDir == Direction.DOWN_RIGHT || playerDir == Direction.DOWN_LEFT)
-        {
-            if (obj.GetComponent<NPC>().upInteractionTrigger.bounds.Contains(playerPos))
-            {
-                Debug.Log("up");
                 return true;
             }
         }
@@ -118,7 +105,6 @@ public class Interaction : MonoBehaviour {
                     }
                     if (closestObject == gameObject)    // If this is the closest object, begin interaction
                     {
-                        // Begin interaction
                         GameState.setState(GameState.gameState.paused);
                         interacting = true;
                         for (int i = 0; i < interactionType.Length; i++)

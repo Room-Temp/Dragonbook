@@ -44,13 +44,11 @@ public class Dialogue : Interaction
     private string textCount;
     private int dialogueIndex;
 
-    public void beginDialogue()
+    public void beginDialogue() // Trigger the dialogue from another script
     {
         _scrollText = scrollText();
         StartCoroutine(_scrollText);
     }
-
-    // Functions:
     private int parseText(int index)
     {
         // [Wn][W] - wait n frames (n = positive integer)
