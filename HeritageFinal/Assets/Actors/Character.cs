@@ -14,8 +14,10 @@ public class Character : Actor {
     public int animationSpeed;
     public int direction;
     public bool defaultSpeeds;
+    public string characterName;
     protected const float DEFAULT_MOVEMENT_SPEED = 0.5f;
     protected const int DEFAULT_ANIMATION_SPEED = 10;
+    
 
     protected override void Start () {
         if (defaultSpeeds)

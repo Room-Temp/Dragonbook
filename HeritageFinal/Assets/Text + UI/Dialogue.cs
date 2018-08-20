@@ -40,15 +40,15 @@ public class Dialogue : Interaction
     private bool advanceMarker;
     private bool option1;
     private bool option2;
-    private bool option1Selected = true;
+    private bool option1Selected;
     private string textCount;
     private int dialogueIndex;
 
-    public void beginDialogue() // Trigger the dialogue from another script
+    public void beginDialogue() 
     {
         _scrollText = scrollText();
         StartCoroutine(_scrollText);
-    }
+    }       // Trigger the dialogue from another script
     private int parseText(int index)
     {
         // [Wn][W] - wait n frames (n = positive integer)
@@ -56,6 +56,7 @@ public class Dialogue : Interaction
         // [I] - instant scroll
         // [N] - new text box
         // [O] - new option text box
+        // [V] - new vendor text box
         textCount += dialogue[index];
         index++;
         textCount += dialogue[index];
@@ -101,43 +102,41 @@ public class Dialogue : Interaction
                 }
                 else if (option1 && !option2) // Option 1 text
                 {
-                    if (!option1Selected)
+                    currDialogue = "";
+                    option1 = false;                    
+                    if (option1Selected)
                     {
-                        instantScroll = true;
+                        newText = true;
+                        index++;
+                        while (!(dialogue[index] == 'O' && dialogue[index + 1] == ']'))
+                        {
+                            textCount += dialogue[index];
+                            index++;
+                        }
+                        textCount += dialogue[index];
                     }
                     else
                     {
-                        Interface.dialogueTextBox.text = "";
-                        instantScroll = false;
+                        option2 = true;
                     }
-                    option1 = false;
-                    option2 = true;
                 }
-                else if (!option1 && option2) // Option 2 text
+                else if (!option1 && option2)
                 {
                     if (!option1Selected)
                     {
-                        Interface.dialogueTextBox.text = "";
-                        instantScroll = false;
+                        newText = true;
                     }
-                    else
-                    {
-                        instantScroll = true;
-                    }
-                    option1 = true;
-                }
-                else if (option1 && option2)    // End Option text
-                {
-                    option1 = false;
                     option2 = false;
                 }
                 index++;
                 break;
+            case 'V':
+                break;
         }
         textCount += dialogue[index];
-        return index;   //this should always return the index after ']'.
-    }
-    private int readWord(int index) // Returns the length of the word beginning at index + 1
+        return index;   //this should always return the index at ']'.
+    }   // Reads and interprets commands
+    private int readWord(int index)
     {
         int count = 0;
         try
@@ -152,7 +151,7 @@ public class Dialogue : Interaction
             count = 0;
         }
         return count;
-    }
+    }    // Returns the length of the word beginning at index + 1
     private bool checkTextCount()
     {
         string tempCount = "";
@@ -180,6 +179,7 @@ public class Dialogue : Interaction
         Interface.dialogueAdvanceSprite.enabled = false;
         Interface.dialogueOption1.enabled = false;
         Interface.dialogueOption2.enabled = false;
+        Interface.dialogueNameBox.text = gameObject.GetComponent<Character>().name;
         for (int i = 0; textCount != dialogue; i++)
         {
             currDialogue = "";
@@ -193,6 +193,10 @@ public class Dialogue : Interaction
                     if (dialogue[dialogueIndex] == '[') // Beginning of command
                     {
                         dialogueIndex = parseText(dialogueIndex);
+                        if (dialogueIndex >= dialogue.Length)
+                        {
+                            goto newBox;
+                        }
                         if (newText)
                         {
                             dialogueIndex++;
@@ -236,13 +240,20 @@ public class Dialogue : Interaction
                 }
                 currDialogue += '\n';
             }
-        newBox:
+            newBox:
+            bool buttonPressed = true;
             if (option1 && !option2)
             {
                 // Display
+                Interface.dialogueOption1.enabled = true;
+                Interface.dialogueOption2.enabled = true;
+                Interface.dialogueOption1.text = "";
+                Interface.dialogueOption2.text = "";
                 Interface.dialogueOption1.color = new Color(1, 1, 0, 1);    // yellow text indicates what is selected
                 Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
                 bool optionAnswered = false;
+                option1Selected = true;
+                lockSpeed = true;
                 for (int j = 0; j < OPTION_1_DEFAULT.Length; j++)
                 {
                     Interface.dialogueOption1.text += OPTION_1_DEFAULT[j];
@@ -263,45 +274,66 @@ public class Dialogue : Interaction
                         yield return new WaitForEndOfFrame();
                     }
                 }
+                lockSpeed = false;
                 while (!optionAnswered)
                 {
                     Interface.dialogueOption1.color = new Color(1, 1, 0, 1);    // yellow text indicates what is selected
                     Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
                     while (option1Selected)
                     {
-                        if (Input.GetKeyDown(Controls.right))
+                        if (!Input.GetKey(Controls.buttonA))
+                        {
+                            buttonPressed = false;
+                        }
+                        yield return new WaitForEndOfFrame();
+                        if (Input.GetKey(Controls.right))
                         {
                             option1Selected = false;
                         }
-                        else if (Input.GetKeyDown(Controls.buttonA))
+                        else if (Input.GetKey(Controls.buttonA) && !buttonPressed)
                         {
                             optionAnswered = true;
+                            break;
                             // TODO: branching scripts using an option
-                        }
-                        yield return new WaitForEndOfFrame();
+                        }                       
                     }
                     if (optionAnswered) break;
                     Interface.dialogueOption1.color = new Color(1, 1, 1, 1);
                     Interface.dialogueOption2.color = new Color(1, 1, 0, 1);
                     while (!option1Selected)
                     {
-                        if (Input.GetKeyDown(Controls.left))
+                        if (!Input.GetKey(Controls.buttonA))
+                        {
+                            buttonPressed = false;
+                        }
+                        yield return new WaitForEndOfFrame();
+                        if (Input.GetKey(Controls.left))
                         {
                             option1Selected = true;
                         }
-                        else if (Input.GetKeyDown(Controls.buttonA))
+                        else if (Input.GetKey(Controls.buttonA) && !buttonPressed)
                         {
                             optionAnswered = true;
+                            break;
                         }
-                        yield return new WaitForEndOfFrame();
                     }
                 }
-
+                if (!option1Selected)
+                {
+                    while (!(dialogue[dialogueIndex] == '[' && dialogue[dialogueIndex + 1] == 'O'))
+                    {
+                        textCount += dialogue[dialogueIndex];
+                        dialogueIndex++;
+                    }
+                }
+                Interface.dialogueOption1.enabled = false;
+                Interface.dialogueOption2.enabled = false;
             }
             else
             {
-                Interface.dialogueAdvanceSprite.enabled = true;
                 bool fadingIn = true;
+                
+                Interface.dialogueAdvanceSprite.enabled = true;
                 Interface.dialogueAdvanceSprite.color = new
                     Color(Interface.dialogueAdvanceSprite.color.r,
                           Interface.dialogueAdvanceSprite.color.g,
@@ -333,11 +365,15 @@ public class Dialogue : Interaction
                             Interface.dialogueAdvanceSprite.color.b,
                             Interface.dialogueAdvanceSprite.color.a - TEXT_ADVANCE_BREATHE_RATE);
                     }
-                    if (Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB))
+                    if (!(Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB)))
+                    {
+                        buttonPressed = false;
+                    }
+                    yield return new WaitForEndOfFrame();
+                    if ((Input.GetKey(Controls.buttonA) || Input.GetKey(Controls.buttonB)) && !buttonPressed)
                     {
                         advanceMarker = false;
                     }
-                    yield return new WaitForEndOfFrame();
                 }
                 advanceMarker = true;
                 Interface.dialogueAdvanceSprite.enabled = false;
@@ -359,6 +395,7 @@ public class Dialogue : Interaction
     }
     void Start()
     {
+        option1Selected = true;
         wait = false;
         lockSpeed = false;
         instantScroll = false;
@@ -370,5 +407,16 @@ public class Dialogue : Interaction
     }
     void Update()
     {
+        if (dialogueRunning)
+        {
+            if (Input.GetKey(Controls.buttonA) && !lockSpeed)
+            {
+                scrollSpeed = SCROLL_SPEED - 1;
+            }
+            else
+            {
+                scrollSpeed = SCROLL_SPEED;
+            }
+        }
     }
 }
