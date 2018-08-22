@@ -281,6 +281,17 @@ public class Dialogue : Interaction
                     Interface.dialogueOption2.color = new Color(1, 1, 1, 1);
                     while (option1Selected)
                     {
+                        if (Controls.getKeyDown(Controls.buttonA))
+                        {
+                            optionAnswered = true;
+                            break;
+                        }
+                        else if (Controls.getKeyDown(Controls.right) && !Controls.getKeyDown(Controls.left))
+                        {
+                            option1Selected = false;
+                        }
+                        yield return new WaitForEndOfFrame();
+                        /*
                         if (!Input.GetKey(Controls.buttonA))
                         {
                             buttonPressed = false;
@@ -295,13 +306,25 @@ public class Dialogue : Interaction
                             optionAnswered = true;
                             break;
                             // TODO: branching scripts using an option
-                        }                       
+                        } 
+                        */
                     }
                     if (optionAnswered) break;
                     Interface.dialogueOption1.color = new Color(1, 1, 1, 1);
                     Interface.dialogueOption2.color = new Color(1, 1, 0, 1);
                     while (!option1Selected)
                     {
+                        if (Controls.getKeyDown(Controls.buttonA))
+                        {
+                            optionAnswered = true;
+                            break;
+                        }
+                        else if (Controls.getKeyDown(Controls.left) && !Controls.getKeyDown(Controls.right))
+                        {
+                            option1Selected = true;
+                        }
+                        yield return new WaitForEndOfFrame();
+                        /*
                         if (!Input.GetKey(Controls.buttonA))
                         {
                             buttonPressed = false;
@@ -316,6 +339,7 @@ public class Dialogue : Interaction
                             optionAnswered = true;
                             break;
                         }
+                        */
                     }
                 }
                 if (!option1Selected)

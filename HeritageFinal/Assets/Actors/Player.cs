@@ -10,6 +10,11 @@ using UnityEngine;
 
 public class Player : Character {
 
+    private const int FOLLOWER_FRAMES = 60;
+
+    private static int[] followerDirections;
+    private static int followerCount;
+
     private bool up;
     private bool down;
     private bool left;
@@ -24,6 +29,7 @@ public class Player : Character {
 	// Use this for initialization
 	protected override void Start () {
         base.Start();
+        followerCount = -1;
         Dialogue.dialogueRunning = false;
     }
 	
@@ -42,19 +48,35 @@ public class Player : Character {
         down = Input.GetKey(Controls.down);
         left = Input.GetKey(Controls.left);
         right = Input.GetKey(Controls.right);
-		if (controllable && !Interaction.interacting && GameState.getState(GameState.gameState.overworld))
-        {    
-            // Movement        
-            if (up && !down && !left && !right) direction = Direction.UP;
-            else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
-            else if (!up && !down && !left && right) direction = Direction.RIGHT;
-            else if (!up && down && !left && right) direction = Direction.DOWN_RIGHT;
-            else if (!up && down && !left && !right) direction = Direction.DOWN;
-            else if (!up && down && left && !right) direction = Direction.DOWN_LEFT;
-            else if (!up && !down && left && !right) direction = Direction.LEFT;
-            else if (up && !down && left && !right) direction = Direction.UP_LEFT;
-            else direction = Direction.IDLE;
-            gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+        if (!Interaction.interacting && GameState.getState(GameState.gameState.overworld))
+        {
+            if (controllable)
+            {
+                // Set instructions for followers
+                followerCount = (followerCount + 1) % FOLLOWER_FRAMES;
+                followerDirections[followerCount] = direction;
+                
+
+                // Movement
+                if (up && !down && !left && !right) direction = Direction.UP;
+                else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
+                else if (!up && !down && !left && right) direction = Direction.RIGHT;
+                else if (!up && down && !left && right) direction = Direction.DOWN_RIGHT;
+                else if (!up && down && !left && !right) direction = Direction.DOWN;
+                else if (!up && down && left && !right) direction = Direction.DOWN_LEFT;
+                else if (!up && !down && left && !right) direction = Direction.LEFT;
+                else if (up && !down && left && !right) direction = Direction.UP_LEFT;
+                else direction = Direction.IDLE;
+                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+            }
+            else
+            {
+                if (followerCount < 0)
+                {
+                    gameObject.GetComponent<Movement>().move
+                        (followerDirections[followerCount], movementSpeed, animationSpeed);
+                }
+            }
         }
         base.Update();
     }
