@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Actor : MonoBehaviour {
 
+    /* 
+        Script - Actor
+        Type - Superscript
+        Purpose - An actor is defined as anything that is NOT a background/terrain tile
+                Actors can be houses, trees, the player, etc.
+    */
 	// Use this for initialization
 	protected virtual void Start () {
 	}

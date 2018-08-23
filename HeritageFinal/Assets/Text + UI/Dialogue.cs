@@ -26,7 +26,8 @@ public class Dialogue : Interaction
     const string OPTION_2_DEFAULT = "No";
 
     // Variables:
-    public string dialogue; // The dialogue typed in the editor's component
+    public string[] dialogues;
+    private string dialogue; // The dialogue typed in the editor's component
     public bool playerInitiatesDialogue;    // If true, the script listens for the player's button press
     public string option1String;
     public string option2String;
@@ -44,8 +45,9 @@ public class Dialogue : Interaction
     private string textCount;
     private int dialogueIndex;
 
-    public void beginDialogue() 
+    public void beginDialogue(int state) 
     {
+        dialogue = dialogues[state];
         _scrollText = scrollText();
         StartCoroutine(_scrollText);
     }       // Trigger the dialogue from another script

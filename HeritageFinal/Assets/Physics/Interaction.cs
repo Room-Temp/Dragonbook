@@ -115,7 +115,7 @@ public class Interaction : MonoBehaviour {
                                 case InteractionType.dialogue:
                                     if (gameObject.GetComponent<SpriteAnimation>() != null)
                                     {
-                                        int playerDir;
+                                        int playerDir;                                        
                                         if (getPlayer().gameObject.GetComponent<Movement>().direction == Direction.IDLE)
                                         {
                                             playerDir = getPlayer().gameObject.GetComponent<Movement>().prevDir;
@@ -145,7 +145,7 @@ public class Interaction : MonoBehaviour {
                                             gameObject.GetComponent<SpriteAnimation>().startAnimation(gameObject.GetComponent<SpriteAnimation>().leftMovementFrames);
                                         }
                                     }
-                                    gameObject.GetComponent<Dialogue>().beginDialogue();                                    
+                                    gameObject.GetComponent<Dialogue>().beginDialogue(gameObject.GetComponent<NPC>().characterState);                                    
                                     break;
                                 case InteractionType.vendor:
                                     break;

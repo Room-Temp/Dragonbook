@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class NPC : Character {
 
-	/*
+    /*
         Name: NPC
         Type: Object Script
         Purpose: An NPC is a non-controllable character that is not in the player's party or an enemy.
     */
+
+    public int characterState;  // The "instance" of the NPC. Defaults to zero
+                                // EX: Speak with NPC the first time. characterState increases. Speak with character the second time. Text is different
+
 	protected override void Start () {
         base.Start();
+        characterState = 0;
         switch (direction)  // Direction of an NPC is initially set in the editor. It should always be in a cardinal direction
         {
             case (Direction.UP):
