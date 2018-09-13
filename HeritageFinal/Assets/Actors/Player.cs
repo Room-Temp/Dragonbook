@@ -10,15 +10,21 @@ using UnityEngine;
 
 public class Player : Character {
 
-    private const int FOLLOWER_FRAMES = 60;
+    private const int FOLLOWER_FRAMES = 200;
+    private const int CHARACTER_SPACING = 7;
 
-    private static int[] followerDirections;
+    private static int[] followerDirections = new int[FOLLOWER_FRAMES];    
     private static int followerCount;
+    private int[] thisFollowerDirection = new int[FOLLOWER_FRAMES];
+    private int thisFollowerCount;
+    private bool beginFollow;
+    private static bool followerCountChanged;
 
     private bool up;
     private bool down;
     private bool left;
     private bool right;
+
 
     public bool controllable;
 
@@ -29,7 +35,9 @@ public class Player : Character {
 	// Use this for initialization
 	protected override void Start () {
         base.Start();
-        followerCount = -1;
+        followerCount = 0;
+        thisFollowerCount = -1;
+        beginFollow = false;
         Dialogue.dialogueRunning = false;
     }
 	
@@ -52,11 +60,6 @@ public class Player : Character {
         {
             if (controllable)
             {
-                // Set instructions for followers
-                followerCount = (followerCount + 1) % FOLLOWER_FRAMES;
-                followerDirections[followerCount] = direction;
-                
-
                 // Movement
                 if (up && !down && !left && !right) direction = Direction.UP;
                 else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
@@ -68,14 +71,43 @@ public class Player : Character {
                 else if (up && !down && left && !right) direction = Direction.UP_LEFT;
                 else direction = Direction.IDLE;
                 gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+
+                followerCountChanged = false;
+                if (direction != Direction.IDLE)
+                {
+                    if (followerCount == FOLLOWER_FRAMES)
+                    {
+                        followerCount = 0;
+                    }
+                    followerDirections[followerCount] = direction;
+                    followerCount++;
+                    followerCountChanged = true;
+                }
             }
             else
             {
-                if (followerCount < 0)
+                // Follower Movement
+                if (followerCountChanged)
                 {
-                    gameObject.GetComponent<Movement>().move
-                        (followerDirections[followerCount], movementSpeed, animationSpeed);
+                    thisFollowerCount = followerCount - (CHARACTER_SPACING * (linePlacement - 1));
+                    if (thisFollowerCount >= 0 && !beginFollow)
+                    {
+                        beginFollow = true;
+                    }
+                    if (thisFollowerCount < 0 && beginFollow)
+                    {
+                        gameObject.GetComponent<Movement>().move(followerDirections[FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount)], movementSpeed, animationSpeed);
+                    }
+                    else if (thisFollowerCount >= 0)
+                    {
+                        gameObject.GetComponent<Movement>().move(followerDirections[thisFollowerCount], movementSpeed, animationSpeed);
+                    }
                 }
+                else
+                {
+                    gameObject.GetComponent<Movement>().move(Direction.IDLE, movementSpeed, animationSpeed);
+                }
+                
             }
         }
         base.Update();

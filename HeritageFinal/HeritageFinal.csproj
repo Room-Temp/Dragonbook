@@ -311,6 +311,7 @@
     <Compile Include="Assets\Physics\Direction.cs" />
     <Compile Include="Assets\Physics\Interaction.cs" />
     <Compile Include="Assets\Physics\InteractionCollider.cs" />
+    <Compile Include="Assets\Physics\Math.cs" />
     <Compile Include="Assets\Physics\Movement.cs" />
     <Compile Include="Assets\Physics\SpriteAnimation.cs" />
     <Compile Include="Assets\Text + UI\Dialogue.cs" />
