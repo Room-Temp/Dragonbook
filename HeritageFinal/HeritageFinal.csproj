@@ -305,6 +305,7 @@
   <ItemGroup>
     <Compile Include="Assets\Actors\Actor.cs" />
     <Compile Include="Assets\Actors\Character.cs" />
+    <Compile Include="Assets\Actors\FollowerNode.cs" />
     <Compile Include="Assets\Actors\NPC.cs" />
     <Compile Include="Assets\Actors\Player.cs" />
     <Compile Include="Assets\Physics\Controls.cs" />

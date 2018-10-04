@@ -11,14 +11,19 @@ using UnityEngine;
 public class Player : Character {
 
     private const int FOLLOWER_FRAMES = 200;
-    private const int CHARACTER_SPACING = 7;
+    private const int CHARACTER_SPACING = 15;
 
-    private static int[] followerDirections = new int[FOLLOWER_FRAMES];    
+    //private static int[] playerTrail = new int[FOLLOWER_FRAMES];    
+    private static FollowerNode[] playerTrail;
+    private static int trailIndex;
     private static int followerCount;
-    private int[] thisFollowerDirection = new int[FOLLOWER_FRAMES];
+    private int[] followerTrail = new int[FOLLOWER_FRAMES];
     private int thisFollowerCount;
     private bool beginFollow;
     private static bool followerCountChanged;
+    private Vector2 currPos;
+    private int prevDir;
+    private int currDir;
 
     private bool up;
     private bool down;
@@ -27,6 +32,7 @@ public class Player : Character {
 
 
     public bool controllable;
+    public static bool hasMoved;
 
     public int linePlacement;   // 1 is the controllable character
 
@@ -36,8 +42,10 @@ public class Player : Character {
 	protected override void Start () {
         base.Start();
         followerCount = 0;
+        trailIndex = 0;
         thisFollowerCount = -1;
         beginFollow = false;
+        hasMoved = false;
         Dialogue.dialogueRunning = false;
     }
 	
@@ -46,7 +54,7 @@ public class Player : Character {
             if (linePlacement == 1)
             {
                 controllable = !controllable;
-            direction = Direction.IDLE;
+                direction = Direction.IDLE;
             }
     }
 
@@ -58,18 +66,101 @@ public class Player : Character {
         right = Input.GetKey(Controls.right);
         if (!Interaction.interacting && GameState.getState(GameState.gameState.overworld))
         {
+            if (controllable && prevDir != Direction.IDLE)
+            {
+                currPos = gameObject.GetComponentInParent<Player>().gameObject.GetComponent<BoxCollider2D>().offset;
+                prevDir = direction;
+            }
+            if (up && !down && !left && !right) direction = Direction.UP;
+            else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
+            else if (!up && !down && !left && right) direction = Direction.RIGHT;
+            else if (!up && down && !left && right) direction = Direction.DOWN_RIGHT;
+            else if (!up && down && !left && !right) direction = Direction.DOWN;
+            else if (!up && down && left && !right) direction = Direction.DOWN_LEFT;
+            else if (!up && !down && left && !right) direction = Direction.LEFT;
+            else if (up && !down && left && !right) direction = Direction.UP_LEFT;
+            else direction = Direction.IDLE;
+
+            if (controllable && direction != Direction.IDLE)
+            {
+                currDir = direction;    //last non-idle direction
+                if (currDir != prevDir)
+                {
+                    playerTrail[trailIndex].setNode(direction, currPos);
+                    trailIndex++;
+
+                    if (trailIndex == FOLLOWER_FRAMES)
+                    {
+                        trailIndex = 0;
+                    }
+                }
+            }
+
+            if (controllable)
+            {
+                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+            }
+            else
+            {
+                
+            }
+
+            /*
+            if (controllable)
+            {
+                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);               
+            }
+            else if (hasMoved)
+            {
+                playerTrail[followerCount] = direction;
+                if (followerCountChanged)
+               {
+                    thisFollowerCount = followerCount - (CHARACTER_SPACING * (linePlacement - 1));
+                    if (thisFollowerCount == 0 && !beginFollow)
+                    {
+                        beginFollow = true;
+                    }
+                    if (thisFollowerCount < 0 && beginFollow)
+                    {
+                        //gameObject.GetComponent<Movement>().move(playerTrail[(FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount) - 1)], movementSpeed, animationSpeed);
+                        gameObject.GetComponent<Movement>().move(playerTrail[FOLLOWER_FRAMES + thisFollowerCount], movementSpeed, animationSpeed);
+                    }
+                    else if (thisFollowerCount >= 0)
+                    {
+                        gameObject.GetComponent<Movement>().move(playerTrail[thisFollowerCount], movementSpeed, animationSpeed);
+                    }
+                }
+                else
+                {
+                    gameObject.GetComponent<Movement>().move(Direction.IDLE, movementSpeed, animationSpeed);
+                }
+            }
+            
+            if (followerCount == FOLLOWER_FRAMES)
+            {
+                followerCount = 0;
+            }
+            followerCountChanged = true;
+        */
+
+            /*
+               if (direction != Direction.IDLE)
+               {
+                   followerCount++;
+                   if (followerCount == FOLLOWER_FRAMES)
+                   {
+                       followerCount = 0;
+                   }
+                   followerCountChanged = true;
+               }
+               */
+        }
+        /*
+        if (!Interaction.interacting && GameState.getState(GameState.gameState.overworld))
+        {
             if (controllable)
             {
                 // Movement
-                if (up && !down && !left && !right) direction = Direction.UP;
-                else if (up && !down && !left && right) direction = Direction.UP_RIGHT;
-                else if (!up && !down && !left && right) direction = Direction.RIGHT;
-                else if (!up && down && !left && right) direction = Direction.DOWN_RIGHT;
-                else if (!up && down && !left && !right) direction = Direction.DOWN;
-                else if (!up && down && left && !right) direction = Direction.DOWN_LEFT;
-                else if (!up && !down && left && !right) direction = Direction.LEFT;
-                else if (up && !down && left && !right) direction = Direction.UP_LEFT;
-                else direction = Direction.IDLE;
                 gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
 
                 followerCountChanged = false;
@@ -79,7 +170,7 @@ public class Player : Character {
                     {
                         followerCount = 0;
                     }
-                    followerDirections[followerCount] = direction;
+                    playerTrail[followerCount] = direction;
                     followerCount++;
                     followerCountChanged = true;
                 }
@@ -96,11 +187,11 @@ public class Player : Character {
                     }
                     if (thisFollowerCount < 0 && beginFollow)
                     {
-                        gameObject.GetComponent<Movement>().move(followerDirections[FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount)], movementSpeed, animationSpeed);
+                        gameObject.GetComponent<Movement>().move(playerTrail[FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount)], movementSpeed, animationSpeed);
                     }
                     else if (thisFollowerCount >= 0)
                     {
-                        gameObject.GetComponent<Movement>().move(followerDirections[thisFollowerCount], movementSpeed, animationSpeed);
+                        gameObject.GetComponent<Movement>().move(playerTrail[thisFollowerCount], movementSpeed, animationSpeed);
                     }
                 }
                 else
@@ -109,7 +200,9 @@ public class Player : Character {
                 }
                 
             }
+
         }
+        */
         base.Update();
     }
 }
