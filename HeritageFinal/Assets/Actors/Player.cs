@@ -14,7 +14,8 @@ public class Player : Character {
     private const int CHARACTER_SPACING = 15;
 
     //private static int[] playerTrail = new int[FOLLOWER_FRAMES];    
-    private static FollowerNode[] playerTrail;
+    private static Vector2[] playerTrail = new Vector2[FOLLOWER_FRAMES];
+    private static int[] playerDirections = new int[FOLLOWER_FRAMES];
     private static int trailIndex;
     private static int followerCount;
     private int[] followerTrail = new int[FOLLOWER_FRAMES];
@@ -80,7 +81,52 @@ public class Player : Character {
             else if (!up && !down && left && !right) direction = Direction.LEFT;
             else if (up && !down && left && !right) direction = Direction.UP_LEFT;
             else direction = Direction.IDLE;
+            
+            if (controllable)
+            {
+                if (trailIndex - 1 >= 0)
+                {
+                    // If the position of the character is the same as it was on the last frame,
+                    // do not add to the player trail
+                    if (playerTrail[trailIndex - 1] != gameObject.GetComponent<Rigidbody2D>().position)
+                    {
+                        playerTrail[trailIndex] = gameObject.GetComponent<Rigidbody2D>().position;
+                        playerDirections[trailIndex] = prevDir;
+                        trailIndex++;
+                    }
+                    if (trailIndex == FOLLOWER_FRAMES) trailIndex = 0;
+                }
+                else
+                {
+                    // If the position of the array is zero
+                    if (!hasMoved || playerTrail[FOLLOWER_FRAMES - 1] != gameObject.GetComponent<Rigidbody2D>().position)
+                    {
+                        playerTrail[trailIndex] = gameObject.GetComponent<Rigidbody2D>().position;
+                        hasMoved = true;
+                        trailIndex++;
+                    }
+                }
+            }
+            else
+            {
+                thisFollowerCount = (linePlacement - 1) * CHARACTER_SPACING;
+                if (!beginFollow && thisFollowerCount == trailIndex)
+                {
+                    beginFollow = true;
+                }
+                if (thisFollowerCount <= trailIndex)
+                {
+                    // The follower will follow the player trail at ((linePlacement - 1) * CHARACTER_SPACING)
+                    gameObject.GetComponent<Movement>().move(playerDirections[thisFollowerCount], movementSpeed, animationSpeed);                    
+                }
+                else if (beginFollow)
+                {
+                     thisFollowerCount = (FOLLOWER_FRAMES - (thisFollowerCount - trailIndex));
+                }
 
+            }
+
+            /*
             if (controllable && direction != Direction.IDLE)
             {
                 currDir = direction;    //last non-idle direction
@@ -105,7 +151,7 @@ public class Player : Character {
                 
             }
 
-            /*
+            
             if (controllable)
             {
                 gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);               

@@ -57,8 +57,76 @@ public class Movement : MonoBehaviour {
                 break;
         }
     }
+    public void move(int dir, Vector2 dest, int animSpeed)
+    {
+        gameObject.GetComponent<Rigidbody2D>().MovePosition(dest);
+        dynamicMovement(dir, animSpeed);
+    }
     private void staticMovement(int dir, float moveSpeed)
     {
+        // Find new character position based on rigidbody
+        Vector2 newPos;
+        Vector2 castDirection;
+        float x = gameObject.GetComponent<Rigidbody2D>().position.x;
+        float y = gameObject.GetComponent<Rigidbody2D>().position.y;
+        tempCardDir = prevCardDir;
+        switch (dir)
+        {
+            case Direction.UP:
+                newPos = new Vector2(x, y + moveSpeed);
+                castDirection = new Vector2(0, 1);
+                prevCardDir = Direction.UP;               
+                break;
+            case Direction.UP_RIGHT:
+                newPos = new Vector2(x + moveSpeed, y + moveSpeed);
+                castDirection = new Vector2(1, 1);
+                break;
+            case Direction.RIGHT:
+                newPos = new Vector2(x + moveSpeed, y);
+                castDirection = new Vector2(1, 0);
+                prevCardDir = Direction.RIGHT;
+                break;
+            case Direction.DOWN_RIGHT:
+                newPos = new Vector2(x + moveSpeed, y - moveSpeed);
+                castDirection = new Vector2(1, -1);
+                break;
+            case Direction.DOWN:
+                newPos = new Vector2(x, y - moveSpeed);
+                castDirection = new Vector2(0, -1);
+                prevCardDir = Direction.DOWN;
+                break;
+            case Direction.DOWN_LEFT:
+                newPos = new Vector2(x - moveSpeed, y - moveSpeed);
+                castDirection = new Vector2(-1, -1);
+                break;
+            case Direction.LEFT:
+                newPos = new Vector2(x - moveSpeed, y);
+                castDirection = new Vector2(-1, 0);
+                prevCardDir = Direction.LEFT;
+                break;
+            case Direction.UP_LEFT:
+                newPos = new Vector2(x - moveSpeed, y + moveSpeed);
+                castDirection = new Vector2(-1, 1);
+                break;
+            default:
+                newPos = new Vector2(x, y);
+                castDirection = new Vector2(0, 0);
+                break;
+        }
+
+        // Unity's 2D colliders suck - boxcast to check colliders before moving
+        RaycastHit2D rh2d = Physics2D.BoxCast(
+            gameObject.GetComponent<BoxCollider2D>().bounds.center, 
+            gameObject.GetComponent<BoxCollider2D>().bounds.size, 
+            0, castDirection, moveSpeed);
+        // If the boxcast hit a collider, do not move character
+        if (rh2d.collider != null)
+        {
+            newPos = new Vector2(x, y);
+        }
+        gameObject.GetComponent<Rigidbody2D>().MovePosition(newPos);
+
+        /*
         Vector2 vel = Vector2.zero;
         tempCardDir = prevCardDir;
         switch (dir)
@@ -91,12 +159,13 @@ public class Movement : MonoBehaviour {
             case Direction.UP_LEFT:
                 vel = new Vector2(-moveSpeed, moveSpeed);
                 break;
-        }
+        }        
         if (dir != Direction.IDLE)
         {
             prevDir = dir;
         }
         gameObject.GetComponent<Rigidbody2D>().velocity = vel;
+        */
     }
     private void dynamicMovement(int dir, int animSpeed)
     {
