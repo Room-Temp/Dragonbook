@@ -12,6 +12,8 @@ public class Movement : MonoBehaviour {
 
     public int direction;
     public int prevDir;
+    private Vector2 newPos;
+    private Vector2 castDirection;
     private int prevCardDir;
     private int tempCardDir;
     private bool playerMoving;
@@ -65,8 +67,7 @@ public class Movement : MonoBehaviour {
     private void staticMovement(int dir, float moveSpeed)
     {
         // Find new character position based on rigidbody
-        Vector2 newPos;
-        Vector2 castDirection;
+               
         float x = gameObject.GetComponent<Rigidbody2D>().position.x;
         float y = gameObject.GetComponent<Rigidbody2D>().position.y;
         tempCardDir = prevCardDir;
@@ -113,17 +114,18 @@ public class Movement : MonoBehaviour {
                 castDirection = new Vector2(0, 0);
                 break;
         }
-
+        if (dir != Direction.IDLE) direction = dir;
         // Unity's 2D colliders suck - boxcast to check colliders before moving
         RaycastHit2D rh2d = Physics2D.BoxCast(
-            gameObject.GetComponent<BoxCollider2D>().bounds.center, 
-            gameObject.GetComponent<BoxCollider2D>().bounds.size, 
-            0, castDirection, moveSpeed);
+            gameObject.GetComponent<BoxCollider2D>().bounds.center,
+            gameObject.GetComponent<BoxCollider2D>().bounds.size,
+            0, castDirection, moveSpeed, ~Layer.PLAYER);
         // If the boxcast hit a collider, do not move character
         if (rh2d.collider != null)
         {
             newPos = new Vector2(x, y);
         }
+        
         gameObject.GetComponent<Rigidbody2D>().MovePosition(newPos);
 
         /*

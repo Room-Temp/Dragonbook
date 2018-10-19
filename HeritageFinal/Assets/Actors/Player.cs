@@ -104,8 +104,9 @@ public class Player : Character {
                         playerTrail[trailIndex] = gameObject.GetComponent<Rigidbody2D>().position;
                         hasMoved = true;
                         trailIndex++;
-                    }
+                    }                   
                 }
+                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
             }
             else
             {
@@ -114,16 +115,13 @@ public class Player : Character {
                 {
                     beginFollow = true;
                 }
-                if (thisFollowerCount <= trailIndex)
+                if (beginFollow && thisFollowerCount > trailIndex)
                 {
-                    // The follower will follow the player trail at ((linePlacement - 1) * CHARACTER_SPACING)
-                    gameObject.GetComponent<Movement>().move(playerDirections[thisFollowerCount], movementSpeed, animationSpeed);                    
+                    thisFollowerCount = (FOLLOWER_FRAMES - (thisFollowerCount - trailIndex));
                 }
-                else if (beginFollow)
-                {
-                     thisFollowerCount = (FOLLOWER_FRAMES - (thisFollowerCount - trailIndex));
-                }
-
+                if (beginFollow)
+                    gameObject.GetComponent<Movement>().move
+                        (playerDirections[thisFollowerCount], playerTrail[thisFollowerCount], animationSpeed);
             }
 
             /*
