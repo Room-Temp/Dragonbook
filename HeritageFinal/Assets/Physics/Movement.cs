@@ -15,18 +15,17 @@ public class Movement : MonoBehaviour {
     private Vector2 newPos;
     private Vector2 castDirection;
     private int prevCardDir;
-    private int tempCardDir;
-    private bool playerMoving;
     public enum CharacterType { Static, Dynamic, Player, Follower };
     public CharacterType characterType;
 
 
     void Start () {
-        playerMoving = false;
     }
 
     public void move(int dir, float moveSpeed, int animSpeed)
     {
+        
+        direction = dir;
         switch (characterType)
         {
             case CharacterType.Static:
@@ -37,32 +36,68 @@ public class Movement : MonoBehaviour {
                 dynamicMovement(dir, animSpeed);
                 break;
             case CharacterType.Player:
-                if (dir == Direction.IDLE)  //player has released movement key
+                // Movement functionality depends on the state of the player
+                dir = Player.playerDirection;
+                if (!Player.playerHasMoved)
                 {
+                    // State 1:
+                    // If the player is colliding with an object
+                    // set the direction to idle and stop animation
+                    staticMovement(Direction.IDLE, moveSpeed);
+                    dynamicMovement(Direction.IDLE, animSpeed);
+                    break;
+                }
+
+                if (dir != Direction.IDLE && prevDir == Direction.IDLE)
+                {
+                    // State 2:
+                    // The previous direction was idle, while the new direction
+                    // has been pressed.
+                    // This indicates beginning a movement
                     staticMovement(dir, moveSpeed);
                     dynamicMovement(dir, animSpeed);
+                    break;
                 }
-                else if (dir != Direction.IDLE && !playerMoving) //player begins movement
+                if (dir != Direction.IDLE && prevDir != Direction.IDLE && dir != prevDir)
                 {
+                    // State 3:
+                    // The player has changed directions while still moving
                     staticMovement(dir, moveSpeed);
                     dynamicMovement(dir, animSpeed);
-                    playerMoving = true;
+                    break;
                 }
-                else if (dir != Direction.IDLE && dir != prevDir) //player changes direction in movement
+                if (dir != Direction.IDLE && prevDir == dir)
                 {
+                    // State 4:
+                    // The player has not changed directions while still moving
+                    // In this case dynamicMovement() does not need to be called
                     staticMovement(dir, moveSpeed);
-                    if (prevCardDir != tempCardDir || prevCardDir == 0) dynamicMovement(dir, animSpeed);
-                    playerMoving = true;
+                    break;
+                }
+                if (dir == Direction.IDLE && prevDir != Direction.IDLE)
+                {
+                    // State 5:
+                    // The player is idle, but the previous direction
+                    // is not. This indicates the player stopping
+                    staticMovement(dir, moveSpeed);
+                    dynamicMovement(dir, animSpeed);
+                    break;
                 }
                 break;
+                
             case CharacterType.Follower:
                 break;
         }
+        prevDir = dir;
     }
     public void move(int dir, Vector2 dest, int animSpeed)
     {
+        if (prevDir != dir)
+        {
+            dynamicMovement(dir, animSpeed);
+        }
+        prevDir = dir;
         gameObject.GetComponent<Rigidbody2D>().MovePosition(dest);
-        dynamicMovement(dir, animSpeed);
     }
     private void staticMovement(int dir, float moveSpeed)
     {
@@ -70,7 +105,6 @@ public class Movement : MonoBehaviour {
                
         float x = gameObject.GetComponent<Rigidbody2D>().position.x;
         float y = gameObject.GetComponent<Rigidbody2D>().position.y;
-        tempCardDir = prevCardDir;
         switch (dir)
         {
             case Direction.UP:
@@ -114,64 +148,21 @@ public class Movement : MonoBehaviour {
                 castDirection = new Vector2(0, 0);
                 break;
         }
-        if (dir != Direction.IDLE) direction = dir;
         // Unity's 2D colliders suck - boxcast to check colliders before moving
         RaycastHit2D rh2d = Physics2D.BoxCast(
             gameObject.GetComponent<BoxCollider2D>().bounds.center,
             gameObject.GetComponent<BoxCollider2D>().bounds.size,
-            0, castDirection, moveSpeed, ~Layer.PLAYER);
+            0, castDirection, moveSpeed, ~(Layer.PLAYER | Layer.INTERACTION));
         // If the boxcast hit a collider, do not move character
         if (rh2d.collider != null)
         {
             newPos = new Vector2(x, y);
         }
-        
         gameObject.GetComponent<Rigidbody2D>().MovePosition(newPos);
-
-        /*
-        Vector2 vel = Vector2.zero;
-        tempCardDir = prevCardDir;
-        switch (dir)
-        {
-            case Direction.UP:
-                vel = new Vector2(0, moveSpeed);
-                prevCardDir = Direction.UP;
-                break;
-            case Direction.UP_RIGHT:
-                vel = new Vector2(moveSpeed, moveSpeed);
-                break;
-            case Direction.RIGHT:
-                vel = new Vector2(moveSpeed, 0);
-                prevCardDir = Direction.RIGHT;
-                break;
-            case Direction.DOWN_RIGHT:
-                vel = new Vector2(moveSpeed, -moveSpeed);
-                break;
-            case Direction.DOWN:
-                vel = new Vector2(0, -moveSpeed);
-                prevCardDir = Direction.DOWN;
-                break;
-            case Direction.DOWN_LEFT:
-                vel = new Vector2(-moveSpeed, -moveSpeed);
-                break;
-            case Direction.LEFT:
-                vel = new Vector2(-moveSpeed, 0);
-                prevCardDir = Direction.LEFT;
-                break;
-            case Direction.UP_LEFT:
-                vel = new Vector2(-moveSpeed, moveSpeed);
-                break;
-        }        
-        if (dir != Direction.IDLE)
-        {
-            prevDir = dir;
-        }
-        gameObject.GetComponent<Rigidbody2D>().velocity = vel;
-        */
     }
     private void dynamicMovement(int dir, int animSpeed)
     {
-            switch (dir)
+        switch (dir)
             {
                 case Direction.UP:
                     gameObject.GetComponent<SpriteAnimation>().anim(SpriteAnimation.spriteIndex.upMovement);
@@ -219,7 +210,6 @@ public class Movement : MonoBehaviour {
                     break;
                 default:
                     gameObject.GetComponent<SpriteAnimation>().stopAnimation(prevDir, prevCardDir);
-                    playerMoving = false;
                     break;
             }      
     }

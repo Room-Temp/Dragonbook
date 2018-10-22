@@ -15,7 +15,8 @@ public class Character : Actor {
     public int direction;
     public bool defaultSpeeds;
     public string characterName;
-    protected const float DEFAULT_MOVEMENT_SPEED = 0.01f;
+    public int prevDir;
+    protected const float DEFAULT_MOVEMENT_SPEED = 0.02f;
     protected const int DEFAULT_ANIMATION_SPEED = 10;
     
 
@@ -29,6 +30,7 @@ public class Character : Actor {
     }
 	
 	protected override void Update () {
+        
         base.Update();
 	}
 }

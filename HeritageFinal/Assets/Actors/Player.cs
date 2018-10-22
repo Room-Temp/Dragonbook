@@ -10,21 +10,21 @@ using UnityEngine;
 
 public class Player : Character {
 
-    private const int FOLLOWER_FRAMES = 200;
-    private const int CHARACTER_SPACING = 15;
+    private const int FOLLOWER_FRAMES = 1000;
+    private const int CHARACTER_SPACING = 20;
 
     //private static int[] playerTrail = new int[FOLLOWER_FRAMES];    
     private static Vector2[] playerTrail = new Vector2[FOLLOWER_FRAMES];
     private static int[] playerDirections = new int[FOLLOWER_FRAMES];
     private static int trailIndex;
-    private static int followerCount;
-    private int[] followerTrail = new int[FOLLOWER_FRAMES];
     private int thisFollowerCount;
     private bool beginFollow;
     private static bool followerCountChanged;
-    private Vector2 currPos;
-    private int prevDir;
+    public static Vector2 playerPosition;
+    public static bool playerHasMoved;
     private int currDir;
+    private Vector2 castDirection;
+    public static int playerDirection;
 
     private bool up;
     private bool down;
@@ -42,12 +42,12 @@ public class Player : Character {
 	// Use this for initialization
 	protected override void Start () {
         base.Start();
-        followerCount = 0;
         trailIndex = 0;
         thisFollowerCount = -1;
         beginFollow = false;
         hasMoved = false;
         Dialogue.dialogueRunning = false;
+        playerHasMoved = true;
     }
 	
     public void stopPlayerControl()
@@ -67,9 +67,9 @@ public class Player : Character {
         right = Input.GetKey(Controls.right);
         if (!Interaction.interacting && GameState.getState(GameState.gameState.overworld))
         {
-            if (controllable && prevDir != Direction.IDLE)
+            if (controllable)
             {
-                currPos = gameObject.GetComponentInParent<Player>().gameObject.GetComponent<BoxCollider2D>().offset;
+
                 prevDir = direction;
             }
             if (up && !down && !left && !right) direction = Direction.UP;
@@ -81,16 +81,70 @@ public class Player : Character {
             else if (!up && !down && left && !right) direction = Direction.LEFT;
             else if (up && !down && left && !right) direction = Direction.UP_LEFT;
             else direction = Direction.IDLE;
-            
+
+
             if (controllable)
             {
-                if (trailIndex - 1 >= 0)
+                playerDirection = direction;
+                switch (direction)
+                {
+                    case Direction.UP:
+                        castDirection = new Vector2(0, 1);
+                        break;
+                    case Direction.UP_RIGHT:
+                        castDirection = new Vector2(1, 1);
+                        break;
+                    case Direction.RIGHT:
+                        castDirection = new Vector2(1, 0);
+                        break;
+                    case Direction.DOWN_RIGHT:
+                        castDirection = new Vector2(1, -1);
+                        break;
+                    case Direction.DOWN:
+                        castDirection = new Vector2(0, -1);
+                        break;
+                    case Direction.DOWN_LEFT:
+                        castDirection = new Vector2(-1, -1);
+                        break;
+                    case Direction.LEFT:
+                        castDirection = new Vector2(-1, 0);
+                        break;
+                    case Direction.UP_LEFT:
+                        castDirection = new Vector2(-1, 1);
+                        break;
+                    default:
+                        castDirection = new Vector2(0, 0);
+                        break;
+                }
+                RaycastHit2D boxcast = Physics2D.BoxCast(
+                    gameObject.GetComponent<BoxCollider2D>().bounds.center,
+                        gameObject.GetComponent<BoxCollider2D>().bounds.size,
+                        0, castDirection, movementSpeed, ~(Layer.PLAYER | Layer.INTERACTION));
+
+                if (boxcast.collider != null)
+                {
+                    //Debug.Log("colliding");
+                    Player[] players = FindObjectsOfType<Player>();
+                    for (int i = 0; i < players.Length; i++)
+                    {
+                        players[i].gameObject.GetComponent<SpriteRenderer>().sprite =
+                            players[i].gameObject.GetComponent<SpriteAnimation>().currentSprites[0];
+                    }
+                    playerHasMoved = false;
+                }
+                else
+                {
+                    playerHasMoved = true;
+                }
+                playerPosition = gameObject.GetComponent<Rigidbody2D>().position;
+                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+                if (trailIndex - 1 >= 0 && playerHasMoved)
                 {
                     // If the position of the character is the same as it was on the last frame,
                     // do not add to the player trail
                     if (playerTrail[trailIndex - 1] != gameObject.GetComponent<Rigidbody2D>().position)
                     {
-                        playerTrail[trailIndex] = gameObject.GetComponent<Rigidbody2D>().position;
+                        playerTrail[trailIndex] = playerPosition;
                         playerDirections[trailIndex] = prevDir;
                         trailIndex++;
                     }
@@ -99,154 +153,36 @@ public class Player : Character {
                 else
                 {
                     // If the position of the array is zero
-                    if (!hasMoved || playerTrail[FOLLOWER_FRAMES - 1] != gameObject.GetComponent<Rigidbody2D>().position)
+                    if (!hasMoved || playerTrail[FOLLOWER_FRAMES - 1] != gameObject.GetComponent<Rigidbody2D>().position && playerHasMoved)
                     {
                         playerTrail[trailIndex] = gameObject.GetComponent<Rigidbody2D>().position;
+                        playerDirections[trailIndex] = prevDir;
                         hasMoved = true;
                         trailIndex++;
-                    }                   
+                    }       
+
                 }
-                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
+                
             }
-            else
+            else if (playerHasMoved)
             {
-                thisFollowerCount = (linePlacement - 1) * CHARACTER_SPACING;
-                if (!beginFollow && thisFollowerCount == trailIndex)
+                thisFollowerCount = trailIndex - ((linePlacement - 1) * CHARACTER_SPACING);
+                if (!beginFollow && thisFollowerCount == 0)
                 {
                     beginFollow = true;
                 }
-                if (beginFollow && thisFollowerCount > trailIndex)
+                if (beginFollow && thisFollowerCount < 0)
                 {
-                    thisFollowerCount = (FOLLOWER_FRAMES - (thisFollowerCount - trailIndex));
+                    thisFollowerCount = (FOLLOWER_FRAMES - (((linePlacement - 1) * CHARACTER_SPACING) - trailIndex));
                 }
-                if (beginFollow)
+                if (beginFollow && direction != Direction.IDLE)
                     gameObject.GetComponent<Movement>().move
                         (playerDirections[thisFollowerCount], playerTrail[thisFollowerCount], animationSpeed);
+                if (beginFollow && direction == Direction.IDLE)
+                    gameObject.GetComponent<Movement>().move
+                        (Direction.IDLE, playerTrail[thisFollowerCount], animationSpeed);
             }
-
-            /*
-            if (controllable && direction != Direction.IDLE)
-            {
-                currDir = direction;    //last non-idle direction
-                if (currDir != prevDir)
-                {
-                    playerTrail[trailIndex].setNode(direction, currPos);
-                    trailIndex++;
-
-                    if (trailIndex == FOLLOWER_FRAMES)
-                    {
-                        trailIndex = 0;
-                    }
-                }
-            }
-
-            if (controllable)
-            {
-                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
-            }
-            else
-            {
-                
-            }
-
-            
-            if (controllable)
-            {
-                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);               
-            }
-            else if (hasMoved)
-            {
-                playerTrail[followerCount] = direction;
-                if (followerCountChanged)
-               {
-                    thisFollowerCount = followerCount - (CHARACTER_SPACING * (linePlacement - 1));
-                    if (thisFollowerCount == 0 && !beginFollow)
-                    {
-                        beginFollow = true;
-                    }
-                    if (thisFollowerCount < 0 && beginFollow)
-                    {
-                        //gameObject.GetComponent<Movement>().move(playerTrail[(FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount) - 1)], movementSpeed, animationSpeed);
-                        gameObject.GetComponent<Movement>().move(playerTrail[FOLLOWER_FRAMES + thisFollowerCount], movementSpeed, animationSpeed);
-                    }
-                    else if (thisFollowerCount >= 0)
-                    {
-                        gameObject.GetComponent<Movement>().move(playerTrail[thisFollowerCount], movementSpeed, animationSpeed);
-                    }
-                }
-                else
-                {
-                    gameObject.GetComponent<Movement>().move(Direction.IDLE, movementSpeed, animationSpeed);
-                }
-            }
-            
-            if (followerCount == FOLLOWER_FRAMES)
-            {
-                followerCount = 0;
-            }
-            followerCountChanged = true;
-        */
-
-            /*
-               if (direction != Direction.IDLE)
-               {
-                   followerCount++;
-                   if (followerCount == FOLLOWER_FRAMES)
-                   {
-                       followerCount = 0;
-                   }
-                   followerCountChanged = true;
-               }
-               */
         }
-        /*
-        if (!Interaction.interacting && GameState.getState(GameState.gameState.overworld))
-        {
-            if (controllable)
-            {
-                // Movement
-                gameObject.GetComponent<Movement>().move(direction, movementSpeed, animationSpeed);
-
-                followerCountChanged = false;
-                if (direction != Direction.IDLE)
-                {
-                    if (followerCount == FOLLOWER_FRAMES)
-                    {
-                        followerCount = 0;
-                    }
-                    playerTrail[followerCount] = direction;
-                    followerCount++;
-                    followerCountChanged = true;
-                }
-            }
-            else
-            {
-                // Follower Movement
-                if (followerCountChanged)
-                {
-                    thisFollowerCount = followerCount - (CHARACTER_SPACING * (linePlacement - 1));
-                    if (thisFollowerCount >= 0 && !beginFollow)
-                    {
-                        beginFollow = true;
-                    }
-                    if (thisFollowerCount < 0 && beginFollow)
-                    {
-                        gameObject.GetComponent<Movement>().move(playerTrail[FOLLOWER_FRAMES - ((CHARACTER_SPACING * (linePlacement - 1)) - followerCount)], movementSpeed, animationSpeed);
-                    }
-                    else if (thisFollowerCount >= 0)
-                    {
-                        gameObject.GetComponent<Movement>().move(playerTrail[thisFollowerCount], movementSpeed, animationSpeed);
-                    }
-                }
-                else
-                {
-                    gameObject.GetComponent<Movement>().move(Direction.IDLE, movementSpeed, animationSpeed);
-                }
-                
-            }
-
-        }
-        */
         base.Update();
     }
 }

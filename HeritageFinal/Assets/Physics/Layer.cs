@@ -12,6 +12,7 @@ public class Layer : MonoBehaviour {
 
 
     public const int PLAYER = 1 << 8;
+    public const int INTERACTION = 1 << 9;
 
 	// Use this for initialization
 	void Start () {

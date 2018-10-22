@@ -293,23 +293,6 @@ public class Dialogue : Interaction
                             option1Selected = false;
                         }
                         yield return new WaitForEndOfFrame();
-                        /*
-                        if (!Input.GetKey(Controls.buttonA))
-                        {
-                            buttonPressed = false;
-                        }
-                        yield return new WaitForEndOfFrame();
-                        if (Input.GetKey(Controls.right))
-                        {
-                            option1Selected = false;
-                        }
-                        else if (Input.GetKey(Controls.buttonA) && !buttonPressed)
-                        {
-                            optionAnswered = true;
-                            break;
-                            // TODO: branching scripts using an option
-                        } 
-                        */
                     }
                     if (optionAnswered) break;
                     Interface.dialogueOption1.color = new Color(1, 1, 1, 1);
@@ -326,22 +309,6 @@ public class Dialogue : Interaction
                             option1Selected = true;
                         }
                         yield return new WaitForEndOfFrame();
-                        /*
-                        if (!Input.GetKey(Controls.buttonA))
-                        {
-                            buttonPressed = false;
-                        }
-                        yield return new WaitForEndOfFrame();
-                        if (Input.GetKey(Controls.left))
-                        {
-                            option1Selected = true;
-                        }
-                        else if (Input.GetKey(Controls.buttonA) && !buttonPressed)
-                        {
-                            optionAnswered = true;
-                            break;
-                        }
-                        */
                     }
                 }
                 if (!option1Selected)
