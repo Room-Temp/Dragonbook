@@ -10,6 +10,26 @@ using UnityEngine;
 
 public class Character : Actor {
 
+    // Resources
+    public int health;
+    public int mana;    // used to cast druidic abilities
+    public int psi;     // used to cast psychic abilities
+
+    // Primary stats - increased by armor
+    public int stamina;         // Increases health
+    public int armor;           // Increases damage mitigation
+    public int strength;        // Increases damage output
+    public int wisdom;          // Increases mana
+    public int intelligence;    // Increases PSI
+    public int speed;           // Determines attack order and dodge chance
+
+    // Percentages - increased by weapon
+    public float hitChance;         // Chance to land an attack
+    public float critChance;        // Chance to land a critical hit
+    public float dodgeChance;       // Chance to evade an attack
+    
+
+
     public float movementSpeed;
     public int animationSpeed;
     public int direction;

@@ -59,6 +59,7 @@
      <Compile Include="Assets\Actors\NPC.cs" />
      <Compile Include="Assets\Actors\Player.cs" />
      <Compile Include="Assets\Physics\Controls.cs" />
+     <Compile Include="Assets\Physics\Cutscene.cs" />
      <Compile Include="Assets\Physics\Direction.cs" />
      <Compile Include="Assets\Physics\Interaction.cs" />
      <Compile Include="Assets\Physics\InteractionCollider.cs" />
@@ -66,6 +67,7 @@
      <Compile Include="Assets\Physics\Math.cs" />
      <Compile Include="Assets\Physics\Movement.cs" />
      <Compile Include="Assets\Physics\SpriteAnimation.cs" />
+     <Compile Include="Assets\Skills\Skill.cs" />
      <Compile Include="Assets\Text + UI\Dialogue.cs" />
      <Compile Include="Assets\Text + UI\DialogueOption.cs" />
      <Compile Include="Assets\Text + UI\GameState.cs" />
